@@ -1,3 +1,4 @@
+using System;
 using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Managers;
 using UnityEngine;
@@ -6,22 +7,24 @@ namespace ProjectLightsOut.Gameplay
 {
     public class Projectile : MonoBehaviour
     {
-        private Rigidbody2D rb;
+        [SerializeField] private Rigidbody2D rb;
         private Vector2 direction;
         private int ricochetCount;
         private float destroyTimer = 10f;
         [SerializeField] private int maxRicochetCount = 3;
         [SerializeField] private GameObject impactEffect;
         [SerializeField] private GameObject hitEffect;
+        private Action OnTargetHit;
+        private int targetHit;
 
         private void Awake()
         {
-            rb = GetComponent<Rigidbody2D>();
-        }
+            if (rb == null)
+            {
+                Debug.LogError($"{name}: Rigidbody2D is not assigned!");
+            }
 
-        private void Start()
-        {
-            EventManager.Broadcast(new OnProjectileShoot());
+            OnTargetHit = () => { maxRicochetCount++; };
         }
 
         private void Update()
@@ -55,9 +58,11 @@ namespace ProjectLightsOut.Gameplay
 
             if (hittable != null && hittable.IsHittable)
             {
+                targetHit++;
+                EventManager.Broadcast(new OnPlaySFX("EnemyHit"));
                 EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
                 EventManager.Broadcast(new OnSlowTime(0.1f, 0.2f));
-                hittable.OnHit(1);
+                hittable.OnHit(targetHit, OnTargetHit);
 
                 SpawnHitEffect(collider.transform.position, collider.transform.up);
             }
@@ -68,6 +73,7 @@ namespace ProjectLightsOut.Gameplay
             if (collision.gameObject.CompareTag("Ricochet"))
             {
                 destroyTimer = 10f;
+                EventManager.Broadcast(new OnPlaySFX("WallHit"));
                 
                 if (ricochetCount < maxRicochetCount)
                 {

@@ -14,7 +14,7 @@ TagManager:
   - Water
   - UI
   - Projectile
-  - 
+  - Ambience
   - 
   - 
   - 
@@ -42,4 +42,31 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Floor
+    uniqueID: 3306955835
+    locked: 0
+  - name: Wall
+    uniqueID: 320579965
+    locked: 0
+  - name: Struct
+    uniqueID: 1077729375
+    locked: 0
+  - name: Plant
+    uniqueID: 3629638401
+    locked: 0
+  - name: Character
+    uniqueID: 2752862667
+    locked: 0
+  - name: Player
+    uniqueID: 1918644795
+    locked: 0
+  - name: Projectile
+    uniqueID: 2588721013
+    locked: 0
+  - name: FX
+    uniqueID: 1998389545
+    locked: 0
+  - name: UI
+    uniqueID: 2710231171
     locked: 0

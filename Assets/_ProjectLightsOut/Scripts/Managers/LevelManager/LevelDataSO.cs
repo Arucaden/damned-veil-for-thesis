@@ -8,5 +8,8 @@ namespace ProjectLightsOut.Managers
     {
         public int LevelScore = 1000;
         public List<WaveDataSO> Waves;
+        public int Bullets = 6;
+        public float AceTime = 60f;
+        public List<string> NextLevelScenes;
     }
 }

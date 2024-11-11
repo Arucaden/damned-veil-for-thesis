@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using ProjectLightsOut.DevUtils;
+using UnityEngine;
 
 namespace ProjectLightsOut.Managers
 {
@@ -18,4 +20,28 @@ namespace ProjectLightsOut.Managers
             Duration = 0.5f;
         }
     }
+
+    public class OnChangeGameState : GameEvent
+    {
+        public GameState GameState;
+        public OnChangeGameState(GameState gameState)
+        {
+            GameState = gameState;
+        }
+    }
+
+    public class OnChangeScene : GameEvent
+    {
+        public string SceneName;
+        public float Delay;
+        
+        public OnChangeScene(string sceneName, float delay = 1f)
+        {
+            SceneName = sceneName;
+            Delay = delay;
+        }
+    }
+
+    public class OnGameOver : GameEvent
+    {}
 }

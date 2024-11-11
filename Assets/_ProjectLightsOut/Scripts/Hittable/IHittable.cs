@@ -1,5 +1,10 @@
-public interface IHittable
+using System;
+
+namespace ProjectLightsOut.Gameplay
 {
-    public bool IsHittable { get; }
-    void OnHit(int damage);
+    public interface IHittable
+    {
+        public bool IsHittable { get; }
+        void OnHit(int multiplier, Action onDeadAction = null);
+    }
 }

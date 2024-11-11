@@ -12,3 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b106158dd547cc04e9cb4113b3bc5888, type: 3}
   m_Name: TestDev
   m_EditorClassIdentifier: 
+  LevelScore: 1000
+  Waves:
+  - {fileID: 11400000, guid: 4f1fdff4f9f8c2c4384f1e6bc9d83ea0, type: 2}
+  - {fileID: 11400000, guid: c9eb136e63498474385c982b514e060c, type: 2}
+  Bullets: 6
+  AceTime: 60
+  NextLevelScenes:
+  - 1-1

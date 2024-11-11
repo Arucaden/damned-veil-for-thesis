@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using ProjectLightsOut.DevUtils;
-using ProjectLightsOut.Hittable;
+using ProjectLightsOut.Gameplay;
 using UnityEngine;
 
 namespace ProjectLightsOut.Managers
@@ -9,12 +9,18 @@ namespace ProjectLightsOut.Managers
     public class LevelManager : Singleton<LevelManager>
     {
         [SerializeField] private LevelDataSO levelData;
+        public static LevelDataSO LevelData { get => Instance.levelData; }
+        [SerializeField] private List<Transform> startWaypoints = new List<Transform>();
+        [SerializeField] private List<Transform> endWaypoints = new List<Transform>();
         private List<Enemy> enemies = new List<Enemy>();
         public List<Enemy> Enemies { get => enemies; }
         private List<Enemy> deadEnemies = new List<Enemy>();
         public List<Enemy> DeadEnemies { get => deadEnemies; }
         private int activeProjectiles = 0;
         private bool isLevelComplete = false;
+        private int currentWave = 0;
+        private float timeElapsed = 0f;
+        private int bulletRemaining = 0;
 
         private void OnEnable()
         {
@@ -27,6 +33,8 @@ namespace ProjectLightsOut.Managers
             EventManager.AddListener<OnEnemyDead>(OnEnemyDead);
             EventManager.AddListener<OnProjectileShoot>(OnProjectileShoot);
             EventManager.AddListener<OnProjectileDestroy>(OnProjectileDestroy);
+            EventManager.AddListener<OnPlayerFinishMove>(OnPlayerFinishMove);
+            EventManager.AddListener<OnCompleteCountingScore>(OnCompleteCountingScore);
         }
 
         private void OnDisable()
@@ -35,12 +43,73 @@ namespace ProjectLightsOut.Managers
             EventManager.RemoveListener<OnEnemyDead>(OnEnemyDead);
             EventManager.RemoveListener<OnProjectileShoot>(OnProjectileShoot);
             EventManager.RemoveListener<OnProjectileDestroy>(OnProjectileDestroy);
+            EventManager.RemoveListener<OnPlayerFinishMove>(OnPlayerFinishMove);
+            EventManager.RemoveListener<OnCompleteCountingScore>(OnCompleteCountingScore);
+        }
+
+        private void Update()
+        {
+            timeElapsed += Time.deltaTime;
+        }
+
+        private void Start()
+        {
+            if (startWaypoints.Count > 0)
+            {
+                StartCoroutine(StartLevel());
+            }
+
+            else
+            {
+                OnPlayerFinishMove(new OnPlayerFinishMove());
+            }
+        }
+
+        private IEnumerator StartLevel()
+        {
+            EventManager.Broadcast(new OnPlayerEnableShooting(false));
+
+            if (GameManager.WaitForLag)
+            {
+                yield return new WaitForSeconds(2f);
+                GameManager.WaitForLag = false;
+            }
+
+            yield return new WaitForSeconds(1f);
+            EventManager.Broadcast(new OnSpotting(startWaypoints[startWaypoints.Count-1], 1.7f));
+            EventManager.Broadcast(new OnZoom(-0.3f, 1.7f));
+            EventManager.Broadcast(new OnPlayerMove(true, startWaypoints));
+        }
+
+        private void OnPlayerFinishMove(OnPlayerFinishMove evt)
+        {
+            if (!isLevelComplete)
+            {
+                StartCoroutine(FinishStartMove());
+            }
+        }
+
+        private void OnCompleteCountingScore(OnCompleteCountingScore evt)
+        {
+            string nextLevel = levelData.NextLevelScenes[Random.Range(0, levelData.NextLevelScenes.Count)];
+            EventManager.Broadcast(new OnChangeScene(nextLevel, 2f));
+        }
+
+        private IEnumerator FinishStartMove()
+        {
+            yield return new WaitForSeconds(0.5f);
+            EventManager.Broadcast(new OnSpottingEnd());
+            EventManager.Broadcast(new OnZoomEnd(1f));
+            yield return new WaitForSeconds(1.5f);
+            EventManager.Broadcast(new OnPlayerEnableShooting(true));
+
+            CheckAllEnemiesDead(null);
         }
 
         private void OnEnemyRegister(OnEnemyRegister evt)
         {
             enemies.Add(evt.Enemy);
-            Debug.Log($"LevelManager: Enemy registered. Total enemies remaining: {enemies.Count}");
+            //Debug.Log($"LevelManager: Enemy registered. Total enemies remaining: {enemies.Count}");
         }
 
         private void OnEnemyDead(OnEnemyDead evt)
@@ -48,40 +117,96 @@ namespace ProjectLightsOut.Managers
             enemies.Remove(evt.Enemy);
             deadEnemies.Add(evt.Enemy);
             
-            Debug.Log($"LevelManager: Enemy dead. Total enemies remaining: {enemies.Count}");
-            CheckAllEnemiesDead();
+            //Debug.Log($"LevelManager: Enemy dead. Total enemies remaining: {enemies.Count}");
+            CheckAllEnemiesDead(evt.Enemy);
         }
 
         private void OnProjectileShoot(OnProjectileShoot evt)
         {
             activeProjectiles++;
-            Debug.Log($"LevelManager: Projectile shot. Total active projectiles: {activeProjectiles}");
+            bulletRemaining = evt.BulletLeft;
+            //Debug.Log($"LevelManager: Projectile shot. Total active projectiles: {activeProjectiles}");
         }
 
         private void OnProjectileDestroy(OnProjectileDestroy evt)
         {
             activeProjectiles--;
-            Debug.Log($"LevelManager: Projectile destroyed. Total active projectiles: {activeProjectiles}");
+            //Debug.Log($"LevelManager: Projectile destroyed. Total active projectiles: {activeProjectiles}");
 
             if (activeProjectiles == 0 && isLevelComplete)
             {
-                EventManager.Broadcast(new OnLevelComplete());
+                StartCoroutine(LevelComplete());
+            }
+
+            if (activeProjectiles == 0 && enemies.Count > 0 && bulletRemaining <= 0)
+            {
+                StartCoroutine(GameOver());
             }
         }
 
-        private void CheckAllEnemiesDead()
+        private IEnumerator GameOver()
+        {
+            yield return new WaitForSeconds(1f);
+            EventManager.Broadcast(new OnPlayerEnableShooting(false));
+            yield return new WaitForSeconds(1f);
+            EventManager.Broadcast(new OnGameOver());
+        }
+
+        private IEnumerator LevelComplete()
+        {
+            yield return new WaitForSeconds(1f);
+
+            EventManager.Broadcast(new OnPlayerEnableShooting(false));
+
+            yield return new WaitForSeconds(2f);
+
+            EventManager.Broadcast(new OnPlayerMove(true, endWaypoints));
+            EventManager.Broadcast(new OnLevelComplete(levelData.LevelScore, bulletRemaining, levelData.AceTime- timeElapsed));
+        }
+
+        private void CheckAllEnemiesDead(Enemy enemyDead)
         {
             if (enemies.Count == 0)
             {
-                if (levelData.Waves.Count > 0)
+                if (levelData.Waves.Count > currentWave)
                 {
-                    print("LevelManager: All enemies dead. Loading next wave.");
+                    StartCoroutine(SpawnWave(levelData.Waves[currentWave]));
+                    currentWave++;
                 }
+
                 else
                 {
+                    EventManager.Broadcast(new OnPlaySFX("Bell"));
+                    StartCoroutine(LastEnemyZoom(enemyDead));
                     EventManager.Broadcast(new OnSlowTime(0.1f, 1.2f));
                     isLevelComplete = true;
+
+                    if (activeProjectiles == 0)
+                    {
+                        StartCoroutine(LevelComplete());
+                    }
                 }
+            }
+        }
+
+        private IEnumerator LastEnemyZoom(Enemy lastEnemy)
+        {
+            EventManager.Broadcast(new OnSpotting(lastEnemy.transform, 0.2f));
+            EventManager.Broadcast(new OnZoom(-0.5f, 0.2f));
+
+            yield return new WaitForSecondsRealtime(1.2f);
+
+            EventManager.Broadcast(new OnSpottingEnd(0.4f));
+            EventManager.Broadcast(new OnZoomEnd(0.4f));
+        }
+
+        private IEnumerator SpawnWave(WaveDataSO waveData)
+        {
+            foreach (var enemyData in waveData.Enemies)
+            {
+                yield return new WaitForSeconds(enemyData.SpawnDelay);
+                Enemy enemy = Instantiate(enemyData.EnemyPrefab, enemyData.SpawnPosition, Quaternion.identity).GetComponent<Enemy>();
+                enemy.Spawn();
             }
         }
     }

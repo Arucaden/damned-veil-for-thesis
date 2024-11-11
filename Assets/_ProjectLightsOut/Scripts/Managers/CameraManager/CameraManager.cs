@@ -6,19 +6,20 @@ namespace ProjectLightsOut.Managers
 {
     public class CameraManager : Singleton<CameraManager>
     {
-        private Camera mainCamera;
+        [SerializeField] private Camera mainCamera;
         private Vector3 originalPosition;
         private float dampingSpeed = 1.0f;
         private Coroutine cameraPanCoroutine;
         private Coroutine cameraShakeCoroutine;
         private Coroutine cameraZoomCoroutine;
         private float originalOrthographicSize;
+        private bool isSpotting = false;
 
         protected override void Awake()
         {
             base.Awake();
-            mainCamera = Camera.main;
             originalPosition = mainCamera.transform.localPosition;
+            originalOrthographicSize = mainCamera.orthographicSize;
         }
 
         private void OnEnable()
@@ -46,6 +47,11 @@ namespace ProjectLightsOut.Managers
                 StopCoroutine(cameraShakeCoroutine);
             }
 
+            if (cameraPanCoroutine != null || isSpotting)
+            {
+                return;
+            }
+
             cameraShakeCoroutine = StartCoroutine(ShakeCamera(evt.Duration, evt.Magnitude));
         }
 
@@ -66,7 +72,7 @@ namespace ProjectLightsOut.Managers
                 StopCoroutine(cameraZoomCoroutine);
             }
 
-            cameraZoomCoroutine = StartCoroutine(CameraZoom(originalOrthographicSize, evt.ZoomSpeed));
+            cameraZoomCoroutine = StartCoroutine(CameraZoom(originalOrthographicSize, evt.ZoomSpeed, false));
         }
 
         private IEnumerator ShakeCamera(float duration, float shakeMagnitude)
@@ -87,6 +93,11 @@ namespace ProjectLightsOut.Managers
 
         private IEnumerator CameraPan(Vector3 targetPosition, float moveTime)
         {
+            if (cameraShakeCoroutine != null)
+            {
+                StopCoroutine(cameraShakeCoroutine);
+            }
+
             if (moveTime <= 0.0f)
             {
                 mainCamera.transform.position = targetPosition;
@@ -101,19 +112,29 @@ namespace ProjectLightsOut.Managers
             {
                 mainCamera.transform.position = Vector3.Lerp(lastPosition, targetPosition, timer / moveTime);
                 mainCamera.transform.position = new Vector3(mainCamera.transform.position.x, mainCamera.transform.position.y, lastPosition.z);
-                timer += Time.deltaTime;
+                timer += Time.unscaledDeltaTime;
                 yield return null;
             }
 
             mainCamera.transform.position = targetPosition;
             mainCamera.transform.position = new Vector3(mainCamera.transform.position.x, mainCamera.transform.position.y, lastPosition.z);
+
+            cameraPanCoroutine = null;
         }
 
-        private IEnumerator CameraZoom(float targetOrthographicSize, float zoomTime)
+        private IEnumerator CameraZoom(float targetOrthographicSize, float zoomTime, bool add = true)
         {
             if (zoomTime <= 0.0f)
             {
-                mainCamera.orthographicSize = targetOrthographicSize;
+                if (add)
+                {
+                    mainCamera.orthographicSize += targetOrthographicSize;
+                }
+
+                else
+                {
+                    mainCamera.orthographicSize = targetOrthographicSize;
+                }
                 yield break;
             }
 
@@ -122,12 +143,28 @@ namespace ProjectLightsOut.Managers
 
             while (timer < zoomTime)
             {
-                mainCamera.orthographicSize = Mathf.Lerp(lastOrthographicSize, targetOrthographicSize, timer / zoomTime);
-                timer += Time.deltaTime;
+                if (add)
+                {
+                    mainCamera.orthographicSize = Mathf.Lerp(lastOrthographicSize, lastOrthographicSize + targetOrthographicSize, timer / zoomTime);
+                }
+
+                else
+                {
+                    mainCamera.orthographicSize = Mathf.Lerp(lastOrthographicSize, targetOrthographicSize, timer / zoomTime);
+                }
+                timer += Time.unscaledDeltaTime;
                 yield return null;
             }
 
-            mainCamera.orthographicSize = targetOrthographicSize;
+            if (add)
+            {
+                mainCamera.orthographicSize = lastOrthographicSize + targetOrthographicSize;
+            }
+
+            else
+            {
+                mainCamera.orthographicSize = targetOrthographicSize;
+            }
         }
 
         private void OnSpotting(OnSpotting evt)
@@ -136,6 +173,8 @@ namespace ProjectLightsOut.Managers
             {
                 StopCoroutine(cameraPanCoroutine);
             }
+
+            isSpotting = true;
 
             cameraPanCoroutine = StartCoroutine(CameraPan(evt.Target.position, evt.MoveTime));
         }
@@ -146,6 +185,8 @@ namespace ProjectLightsOut.Managers
             {
                 StopCoroutine(cameraPanCoroutine);
             }
+
+            isSpotting = false;
 
             cameraPanCoroutine = StartCoroutine(CameraPan(originalPosition, evt.MoveTime));
         }

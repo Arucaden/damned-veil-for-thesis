@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: TestDev_Wave1
   m_EditorClassIdentifier: 
   Enemies:
-  - EnemyPrefab: {fileID: 0}
-    SpawnPosition: {x: 0, y: 0}
+  - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
+    SpawnPosition: {x: -0.9309308, y: -1.969688}
+  - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
+    SpawnPosition: {x: 1.33, y: -1.06}

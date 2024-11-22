@@ -7,13 +7,7 @@ using ProjectLightsOut.Managers;
 using UnityEngine;
 
 public class OnEnemyChant : GameEvent
-{
-    public Enemy enemy;
-    public OnEnemyChant(Enemy enemy)
-    {
-        this.enemy = enemy;
-    }
-}
+{}
 
 public class EnemyChanter : Enemy
 {
@@ -80,6 +74,7 @@ public class EnemyChanter : Enemy
         if (evt.IsEnabled)
         {
             EventManager.RemoveListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
+            if (chantEffectAnimator == null) return;
             chantEffectAnimator.enabled = true;
             chantEffect.SetActive(true);
             chantCoroutine = StartCoroutine(Chanting());
@@ -106,9 +101,9 @@ public class EnemyChanter : Enemy
     {
         while (true)
         {
-            yield return new WaitForSeconds(1.3f/2f);
-            EventManager.Broadcast(new OnEnemyChant(this));
-            yield return new WaitForSeconds(1.3f/2f);
+            yield return new WaitForSeconds(0.65f);
+            EventManager.Broadcast(new OnEnemyChant());
+            yield return new WaitForSeconds(0.65f);
         }
     }
 }

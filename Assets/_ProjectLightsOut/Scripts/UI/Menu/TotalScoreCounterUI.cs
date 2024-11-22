@@ -94,14 +94,22 @@ public class TotalScoreCounterUI : MonoBehaviour
         bonusText.text = "+ Level Score";
         StartCoroutine(ScoreBonusAnimation());
         yield return StartCoroutine(ScoreUpAnimation(evt.Score + evt.LevelBonus));
-        yield return new WaitForSeconds(0.3f);
-        bonusText.text = "+ Time Bonus";
-        StartCoroutine(ScoreBonusAnimation());
-        yield return StartCoroutine(ScoreUpAnimation(evt.Score + evt.LevelBonus + evt.TimeBonus));
-        yield return new WaitForSeconds(0.3f);
-        bonusText.text = "+ Magic Bullet Remaining";
-        StartCoroutine(ScoreBonusAnimation());
-        yield return StartCoroutine(ScoreUpAnimation(evt.Score + evt.LevelBonus + evt.TimeBonus + evt.BulletBonus));
+
+        if (evt.TimeBonus > 0)
+        {
+            yield return new WaitForSeconds(0.3f);
+            bonusText.text = "+ Time Bonus";
+            StartCoroutine(ScoreBonusAnimation());
+            yield return StartCoroutine(ScoreUpAnimation(evt.Score + evt.LevelBonus + evt.TimeBonus));
+        }
+        
+        if (evt.BulletBonus > 0 && !LevelManager.LevelData.IsBossLevel)
+        {
+            yield return new WaitForSeconds(0.3f);
+            bonusText.text = "+ Bullet Bonus";
+            StartCoroutine(ScoreBonusAnimation());
+            yield return StartCoroutine(ScoreUpAnimation(evt.Score + evt.LevelBonus + evt.TimeBonus + evt.BulletBonus));
+        }
         
         isCounting = false;
         StartCoroutine(BlinkPlayText());
@@ -175,6 +183,11 @@ public class TotalScoreCounterUI : MonoBehaviour
 
         areaClearText.alpha = 1;
         areaClearText.rectTransform.anchoredPosition = areaClearTextOriginalPosition;
+
+        if (LevelManager.LevelData.IsBossLevel)
+        {
+            EventManager.Broadcast(new OnStopBGM("Boss", 2));
+        }
     }
 
     public void ClickProceedNextLevel()

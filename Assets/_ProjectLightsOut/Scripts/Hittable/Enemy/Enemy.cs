@@ -9,6 +9,7 @@ namespace ProjectLightsOut.Gameplay
     public class Enemy : MonoBehaviour, IHittable
     {
         public bool IsHittable { get; protected set; } = true;
+        public string EnemyIdentifier { get; set; }
         public WaveDataSO WaveData { get; set; }
         [SerializeField] protected int health = 1;
         [SerializeField] private bool immortal;

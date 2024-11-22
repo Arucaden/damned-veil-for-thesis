@@ -11703,10 +11703,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: HUD
       objectReference: {fileID: 0}
-    - target: {fileID: 3543747199043402298, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
-      propertyPath: FadeInOnStart
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

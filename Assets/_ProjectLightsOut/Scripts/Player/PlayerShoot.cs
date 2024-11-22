@@ -28,6 +28,9 @@ namespace ProjectLightsOut.Gameplay
         [SerializeField] private Transform laserSpawnPoint;
         [SerializeField] private float bulletSpeed = 10f;
         [SerializeField] private LineRenderer lineRenderer;
+        [SerializeField] private LineRenderer lineRendererRicochet;
+        [SerializeField] private Gradient reloadGradient;
+        private Gradient lineRendererOriginalColor;
         private bool isFiringEnabled = false;
         public bool IsFiringEnabled {
             get => isFiringEnabled;
@@ -54,6 +57,7 @@ namespace ProjectLightsOut.Gameplay
         private void Awake()
         {
             bulletCollider = bulletPrefab.GetComponent<CircleCollider2D>();
+            lineRendererOriginalColor = lineRenderer.colorGradient;
         }
 
         private void OnEnable()
@@ -81,6 +85,11 @@ namespace ProjectLightsOut.Gameplay
         private void OnPlayerEnableShooting(OnPlayerEnableShooting evt)
         {
             IsFiringEnabled = evt.IsEnabled;
+
+            if (reloadCoroutine != null && !IsFiringEnabled)
+            {
+                StopCoroutine(reloadCoroutine);
+            }
         }
 
         private void Start()
@@ -108,11 +117,14 @@ namespace ProjectLightsOut.Gameplay
         private void OnGrantReload(OnGrantReload evt)
         {
             reloadCoroutine = StartCoroutine(ReloadCoroutine());
+
+            lineRenderer.colorGradient = reloadGradient;
+            lineRendererRicochet.colorGradient = reloadGradient;
         }
 
         private IEnumerator ReloadCoroutine(int bullets = 6)
         {
-            IsFiringEnabled = false;
+            reloading = true;
             float duration = 2f;
 
             for (int i = 0; i < bullets; i++)
@@ -122,7 +134,10 @@ namespace ProjectLightsOut.Gameplay
                 EventManager.Broadcast(new OnBulletReload(1));
             }
 
-            isFiringEnabled = true;
+            reloading = false;
+
+            lineRenderer.colorGradient = lineRendererOriginalColor;
+            lineRendererRicochet.colorGradient = lineRendererOriginalColor;
         }
 
         private void DrawLaser()
@@ -130,11 +145,13 @@ namespace ProjectLightsOut.Gameplay
             if (!isFiringEnabled)
             {
                 lineRenderer.enabled = false;
+                lineRendererRicochet.enabled = false;
             }
 
             else
             {
                 lineRenderer.enabled = true;
+                lineRendererRicochet.enabled = true;
             }
 
             float radiusInWorldSpace = bulletCollider.radius * Mathf.Max(bulletPrefab.transform.lossyScale.x, bulletPrefab.transform.lossyScale.y);
@@ -161,12 +178,33 @@ namespace ProjectLightsOut.Gameplay
                 lineRenderer.SetPosition(0, laserSpawnPoint.position);
                 lineRenderer.SetPosition(1, hitRight.point);
             }
+
+            DrawRicochet(direction, hitLeft, hitRight);
+        }
+
+        private void DrawRicochet(Vector3 direction, RaycastHit2D hitLeft, RaycastHit2D hitRight)
+        {
+            if (hitLeft.distance < hitRight.distance)
+            {
+                Vector2 ricochetDirection = Vector2.Reflect(direction, hitLeft.normal);
+                Debug.DrawRay(hitLeft.point, ricochetDirection * 100, Color.green);
+                
+                lineRendererRicochet.SetPosition(0, hitLeft.point);
+                lineRendererRicochet.SetPosition(1, hitLeft.point + (Vector2)ricochetDirection * 0.1f);
+            }
+
+            else
+            {
+                Vector2 ricochetDirection = Vector2.Reflect(direction, hitRight.normal);
+                Debug.DrawRay(hitRight.point, ricochetDirection * 100, Color.green);
+
+                lineRendererRicochet.SetPosition(0, hitRight.point);
+                lineRendererRicochet.SetPosition(1, hitRight.point + (Vector2)ricochetDirection * 0.1f);
+            }
         }
 
         private void Aim()
         {
-            if (!isFiringEnabled) return;
-            
             direction = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
 
             transform.rotation = Quaternion.LookRotation(Vector3.forward, direction);
@@ -186,6 +224,8 @@ namespace ProjectLightsOut.Gameplay
             {
                 return;
             }
+
+            if (reloading) return;
 
             if (!isFiringEnabled) return;
 

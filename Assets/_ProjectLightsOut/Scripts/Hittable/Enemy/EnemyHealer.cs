@@ -55,7 +55,7 @@ public class EnemyHealer : Enemy
         }
     }
 
-    private void Buff()
+    protected virtual void Buff()
     {
         if (!LevelManager.IsPlayerShootEnabled)
         {

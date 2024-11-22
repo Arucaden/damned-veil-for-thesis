@@ -42,6 +42,9 @@ namespace ProjectLightsOut.Managers
         }
     }
 
+    public class OnFadeBlack : GameEvent
+    {}
+    
     public class OnGameOver : GameEvent
     {}
 }

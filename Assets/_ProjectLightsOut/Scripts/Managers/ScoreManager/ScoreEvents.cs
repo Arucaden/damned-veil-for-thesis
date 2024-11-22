@@ -41,4 +41,7 @@ namespace ProjectLightsOut.Managers
 
     public class OnResetScore : GameEvent
     {}
+
+    public class OnRollbackScore : GameEvent
+    {}
 }

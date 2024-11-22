@@ -31,15 +31,21 @@ public class BossBuffThread : MonoBehaviour
         targetTransform = target;
     }
 
-    private void Update()
+    protected virtual void Update()
     {
-        transform.position = Vector2.MoveTowards(transform.position, targetTransform.position, 1f * Time.deltaTime);
+        transform.position = Vector2.Lerp(transform.position, targetTransform.position, Time.deltaTime * 1);
         transform.rotation = Quaternion.LookRotation(Vector3.forward, targetTransform.position - transform.position);
 
-        if (Vector2.Distance(transform.position, targetTransform.position) < 0.1f)
+        if (Vector2.Distance(transform.position, targetTransform.position) < 0.3f)
         {
-            EventManager.Broadcast(new OnBossBuff(buffType));
-            Destroy(gameObject);
+            Arrived();
         }
+    }
+
+    protected virtual void Arrived()
+    {
+        EventManager.Broadcast(new OnBossBuff(buffType));
+        OnThreadDestroyed?.Invoke();
+        Destroy(gameObject);
     }
 }

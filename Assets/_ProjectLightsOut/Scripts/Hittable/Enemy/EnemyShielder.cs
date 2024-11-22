@@ -9,11 +9,11 @@ public class EnemyShielder : EnemyHealer
     {
         while (true)
         {
+            yield return new WaitForSeconds(0.2f);
+
             chantEffectAnimator.SetTrigger("Buff");
 
             EventManager.Broadcast(new OnBossBuff(BuffType.Shield));
-
-            yield return new WaitForSeconds(1f);
         }
     }
 }

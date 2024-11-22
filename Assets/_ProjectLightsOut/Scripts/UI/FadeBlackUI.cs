@@ -33,16 +33,16 @@ public class FadeBlackUI : MonoBehaviour
     private void OnEnable()
     {
         EventManager.AddListener<OnChangeScene>(OnChangeScene);
-        EventManager.AddListener<OnCompleteCountingScore>(OnCompleteCountingScore);
+        EventManager.AddListener<OnFadeBlack>(OnFadeBlack);
     }
 
     private void OnDisable()
     {
         EventManager.RemoveListener<OnChangeScene>(OnChangeScene);
-        EventManager.RemoveListener<OnCompleteCountingScore>(OnCompleteCountingScore);
+        EventManager.RemoveListener<OnFadeBlack>(OnFadeBlack);
     }
 
-    private void OnCompleteCountingScore(OnCompleteCountingScore e)
+    private void OnFadeBlack(OnFadeBlack e)
     {
         StartCoroutine(FadeBlack(1f));
     }

@@ -8,7 +8,9 @@ public class ShieldEffect : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Collider2D col2D;
     private bool isShieldActive = false;
-    private float shieldDuration = 1f;
+    private float shieldCharge = 1.5f;
+    private float currentShieldCharge = 0f;
+    private float lastShieldTime = 0f;
     private Coroutine shieldCoroutine;
 
     private void Awake()
@@ -21,19 +23,36 @@ public class ShieldEffect : MonoBehaviour
 
     private void Update()
     {
-        if (isShieldActive)
+        if (lastShieldTime > 0)
         {
-            shieldDuration -= Time.deltaTime;
-            if (shieldDuration <= 0)
+            lastShieldTime -= Time.deltaTime;
+            if (lastShieldTime <= 0)
             {
                 DeactivateShield();
             }
         }
+
+        if (lastShieldTime > 0)
+        {
+            if (currentShieldCharge < shieldCharge)
+            {
+                currentShieldCharge += Time.deltaTime;
+            }
+            
+            else
+            {
+                ActivateShield();
+            }
+        }
     }
 
-    public void ActivateShield()
+    public void ChargeShield()
     {
-        shieldDuration = 1.5f;
+        lastShieldTime = 0.3f;
+    }
+
+    private void ActivateShield()
+    {
         if (isShieldActive) return;
         isShieldActive = true;
         spriteRenderer.enabled = true;
@@ -52,6 +71,8 @@ public class ShieldEffect : MonoBehaviour
         if (!isShieldActive) return;
         isShieldActive = false;
         col2D.enabled = false;
+        isShieldActive = false;
+        currentShieldCharge = 0f;
         
         if (shieldCoroutine != null)
         {
@@ -66,7 +87,7 @@ public class ShieldEffect : MonoBehaviour
         float alpha = 0f;
         while (alpha < 1f)
         {
-            alpha += Time.deltaTime;
+            alpha += Time.deltaTime * 2f;
             spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, alpha);
             yield return null;
         }
@@ -77,7 +98,7 @@ public class ShieldEffect : MonoBehaviour
         float alpha = 1f;
         while (alpha > 0f)
         {
-            alpha -= Time.deltaTime;
+            alpha -= Time.deltaTime * 2f;
             spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, alpha);
             yield return null;
         }

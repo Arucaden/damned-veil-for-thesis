@@ -7,13 +7,20 @@ using UnityEngine;
 
 namespace ProjectLightsOut.Gameplay
 {
+    [Serializable]
+    public class ActiveWaveData
+    {
+        public WaveDataSO waveData;
+        public int enemyCount;
+    }
+
     public class Boss : Enemy
     {
         [SerializeField] private List<WaveDataSO> firstPhaseWaves;
         [SerializeField] private List<WaveDataSO> secondPhaseWaves;
         [SerializeField] private ShieldEffect shieldEffect;
         [SerializeField] private List<Transform> teleportPoints;
-        private List<WaveDataSO> activeWaves = new List<WaveDataSO>();
+        private List<ActiveWaveData> activeWaves = new List<ActiveWaveData>();
         public Action OnBossDamaged;
         [HideInInspector] public int MaxHealth;
         private List<Enemy> activeEnemies = new List<Enemy>();
@@ -87,7 +94,7 @@ namespace ProjectLightsOut.Gameplay
             {
                 if (isShieldDisabled) return;
 
-                shieldEffect.ActivateShield();
+                shieldEffect.ChargeShield();
             }
         }
 
@@ -99,11 +106,15 @@ namespace ProjectLightsOut.Gameplay
         private void OnEnemyDead(OnEnemyDead e)
         {
             activeEnemies.Remove(e.Enemy);
-            int enemyCount = FindEnemyByWave(e.Enemy.WaveData);
+            ActiveWaveData activeWaveData = FindActiveWaveByEnemy(e.Enemy);
+            
+            if (activeWaveData == null) return;
 
-            if (enemyCount == 0)
+            activeWaveData.enemyCount--;
+
+            if (activeWaveData.enemyCount <= 0)
             {
-                activeWaves.Remove(e.Enemy.WaveData);
+                activeWaves.Remove(activeWaveData);
             }
         }
 
@@ -142,7 +153,7 @@ namespace ProjectLightsOut.Gameplay
         private void StartSecondPhase()
         {
             isSecondPhase = true;
-            StartCoroutine(Stun(2f));
+            StartCoroutine(Stun(6f));
         }
 
         private IEnumerator Stun(float duration)
@@ -151,6 +162,12 @@ namespace ProjectLightsOut.Gameplay
             animator.SetTrigger("stun");
             EventManager.Broadcast(new OnPlaySFX("Stun"));
             shieldEffect.DeactivateShield();
+            EventManager.Broadcast(new OnSpotting(transform, 0.2f));
+            EventManager.Broadcast(new OnZoom(-0.7f, 0.2f));
+            EventManager.Broadcast(new OnSlowTime(0.1f, 1.2f));
+            yield return new WaitForSeconds(0.5f);
+            EventManager.Broadcast(new OnSpottingEnd(0.4f));
+            EventManager.Broadcast(new OnZoomEnd(0.4f));
             yield return new WaitForSeconds(duration);
             animator.SetTrigger("wake");
             yield return new WaitForSeconds(0.6f);
@@ -184,19 +201,17 @@ namespace ProjectLightsOut.Gameplay
             EventManager.Broadcast(new OnZoomEnd(0.4f));
         }
 
-        private int FindEnemyByWave(WaveDataSO wave)
+        private ActiveWaveData FindActiveWaveByEnemy(Enemy enemy)
         {
-            int count = 0;
-
-            foreach (var enemy in activeEnemies)
+            foreach (ActiveWaveData activeWaveData in activeWaves)
             {
-                if (enemy.WaveData == wave)
+                if (activeWaveData.waveData == enemy.WaveData)
                 {
-                    count++;
+                    return activeWaveData;
                 }
             }
 
-            return count;
+            return null;
         }
 
         private void TrySpawnWave()
@@ -211,7 +226,7 @@ namespace ProjectLightsOut.Gameplay
             if (spawnCooldown <= 0)
             {
                 List<WaveDataSO> waveCache = new List<WaveDataSO>();
-                waveCache.RemoveAll(wave => activeWaves.Contains(wave));
+                waveCache.RemoveAll(x => activeWaves.Exists(y => y.waveData == x));
 
                 if (waveCache.Count == 0)
                 {
@@ -220,7 +235,10 @@ namespace ProjectLightsOut.Gameplay
 
                 int random = UnityEngine.Random.Range(0, waveCache.Count - 1);
                 LevelManager.SpawnEnemyWave(waveCache[random]);
-                activeWaves.Add(waveCache[random]);
+                ActiveWaveData activeWaveData = new ActiveWaveData();
+                activeWaveData.waveData = waveCache[random];
+                activeWaveData.enemyCount = waveCache[random].Enemies.Count;
+                activeWaves.Add(activeWaveData);
                 isSpawnNeeded = false;
                 spawnCooldown = maxSpawnCooldown;
             }
@@ -241,7 +259,10 @@ namespace ProjectLightsOut.Gameplay
             EventManager.Broadcast(new OnBossReady(this));
 
             LevelManager.SpawnEnemyWave(firstPhaseWaves[0]);
-            activeWaves.Add(firstPhaseWaves[0]);
+            ActiveWaveData activeWaveData = new ActiveWaveData();
+            activeWaveData.waveData = firstPhaseWaves[0];
+            activeWaveData.enemyCount = firstPhaseWaves[0].Enemies.Count;
+            activeWaves.Add(activeWaveData);
 
             yield return new WaitForSeconds(4.5f);
 

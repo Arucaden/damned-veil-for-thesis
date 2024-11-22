@@ -80,6 +80,8 @@ namespace ProjectLightsOut.Managers
 
         private void Start()
         {
+            Cursor.visible = false;
+            
             if (!AudioManager.IsBGMPlaying)
             {
                 EventManager.Broadcast(new OnPlayBGM("Gameplay", fadeIn: 1f));
@@ -87,7 +89,7 @@ namespace ProjectLightsOut.Managers
 
             if (levelData.IsBossLevel)
             {
-                EventManager.Broadcast(new OnPlayBGM("Boss", fadeIn: 1f));
+                EventManager.Broadcast(new OnPlayBGM("Boss", fadeIn: 0f));
             }
 
             if (startWaypoints.Count > 0)
@@ -139,6 +141,7 @@ namespace ProjectLightsOut.Managers
         private void OnCompleteCountingScore(OnCompleteCountingScore evt)
         {
             string nextLevel = levelData.NextLevelScenes[Random.Range(0, levelData.NextLevelScenes.Count)];
+            EventManager.Broadcast(new OnFadeBlack());
             EventManager.Broadcast(new OnChangeScene(nextLevel, 2f));
         }
 
@@ -233,11 +236,6 @@ namespace ProjectLightsOut.Managers
             yield return new WaitForSeconds(1f);
 
             EventManager.Broadcast(new OnPlayerEnableShooting(false));
-
-            if (LevelData.IsBossLevel)
-            {
-                EventManager.Broadcast(new OnStopBGM("Boss", 2));
-            }
 
             yield return new WaitForSeconds(2f);
 

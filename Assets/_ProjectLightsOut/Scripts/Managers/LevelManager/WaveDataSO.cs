@@ -12,6 +12,7 @@ namespace ProjectLightsOut.Managers
 
     [Serializable] public struct EnemyData
     {
+        public string EnemyIdentifier;
         public GameObject EnemyPrefab;
         public Vector3 SpawnPosition;
         public float SpawnDelay;

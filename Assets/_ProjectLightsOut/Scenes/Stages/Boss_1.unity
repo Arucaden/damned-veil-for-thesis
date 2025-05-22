@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -8303,12 +8302,12 @@ MonoBehaviour:
   m_RequiresColorTexture: 0
   m_Version: 2
   m_TaaSettings:
-    quality: 3
-    frameInfluence: 0.1
-    jitterScale: 1
-    mipBias: 0
-    varianceClampScale: 0.9
-    contrastAdaptiveSharpening: 0
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
 --- !u!4 &213826646
 Transform:
   m_ObjectHideFlags: 0
@@ -10362,12 +10361,12 @@ MonoBehaviour:
   m_RequiresColorTexture: 0
   m_Version: 2
   m_TaaSettings:
-    quality: 3
-    frameInfluence: 0.1
-    jitterScale: 1
-    mipBias: 0
-    varianceClampScale: 0.9
-    contrastAdaptiveSharpening: 0
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
 --- !u!81 &652034557
 AudioListener:
   m_ObjectHideFlags: 0
@@ -25209,7 +25208,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6851327696493648034, guid: ee18800f86dc64446b08a11220cb945e, type: 3}
       propertyPath: health
-      value: 120
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 6851327696493648034, guid: ee18800f86dc64446b08a11220cb945e, type: 3}
       propertyPath: teleportPoints.Array.data[0]
@@ -25315,6 +25314,18 @@ PrefabInstance:
     - target: {fileID: 2986464011952397341, guid: ccb89e17350dfe04eb890e06f15b54ae, type: 3}
       propertyPath: m_Name
       value: HUD
+      objectReference: {fileID: 0}
+    - target: {fileID: 3255451119424573088, guid: ccb89e17350dfe04eb890e06f15b54ae, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3610794023912793213, guid: ccb89e17350dfe04eb890e06f15b54ae, type: 3}
+      propertyPath: m_Name
+      value: HUDPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 3610794023912793213, guid: ccb89e17350dfe04eb890e06f15b54ae, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3643759845693578033, guid: ccb89e17350dfe04eb890e06f15b54ae, type: 3}
       propertyPath: m_Pivot.x

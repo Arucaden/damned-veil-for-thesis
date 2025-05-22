@@ -77,8 +77,8 @@ public class HUDBossWinBar : MonoBehaviour
             chantBar.color = originalColor;
         }
         
-        lastChantTime = 4f;
-        chantTime += 0.5f;
+        lastChantTime = 2f;
+        chantTime += 0.2f;
 
         if (chantTime >= loseChantTime)
         {

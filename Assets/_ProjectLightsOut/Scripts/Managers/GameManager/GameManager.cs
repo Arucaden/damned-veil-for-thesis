@@ -19,7 +19,10 @@ namespace ProjectLightsOut.Managers
         private bool waitForLag = true;
         public static bool WaitForLag { get => Instance.waitForLag; set => Instance.waitForLag = value; }
         private Action OnSceneLoadComplete;
-        
+        private bool isPaused = false;
+        public static bool IsPaused => Instance.isPaused;
+
+
         protected override void Awake()
         {
             base.Awake();
@@ -45,10 +48,20 @@ namespace ProjectLightsOut.Managers
         {
             if (LevelManager.Instance == null)
             {
-                EventManager.Broadcast(new OnPlayBGM("MainMenu", fadeIn:10f));
+                EventManager.Broadcast(new OnPlayBGM("MainMenu", fadeIn: 10f));
             }
 
             waitForLag = true;
+        }
+
+        private void Update()
+        {
+            if (gameState != GameState.InGame) return;
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                TogglePause();
+            }
         }
 
         private void OnSceneLoaded()
@@ -113,5 +126,44 @@ namespace ProjectLightsOut.Managers
             UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene, mode) => OnSceneLoaded();
         }
+
+        #region Pause pause tolol
+        private void TogglePause()
+        {
+            isPaused = !isPaused;
+            if (isPaused)
+            {
+                Time.timeScale = 0f;
+            }
+            else
+            {
+                Time.timeScale = 1f;
+            }
+            EventManager.Broadcast(new OnPause(isPaused));
+            EventManager.Broadcast(new OnPlayerEnableShooting(!isPaused));
+            Cursor.visible = isPaused;
+        }
+
+        public void RestartGame()
+        {
+            EventManager.Broadcast(new OnChangeGameState(GameState.InGame));
+        }
+
+        public void ResumeGame()
+        {
+            isPaused = false;
+            Time.timeScale = 1f;
+        }
+
+        public void QuitToMainMenu()
+        {
+            EventManager.Broadcast(new OnChangeScene("Menu", 0f));
+            EventManager.Broadcast(new OnChangeGameState(GameState.MainMenu));
+            Time.timeScale = 1f;
+        }
+            
+        #endregion
+
+
     }
 }

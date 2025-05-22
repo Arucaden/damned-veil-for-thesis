@@ -34,7 +34,7 @@ namespace ProjectLightsOut.Managers
     {
         public string SceneName;
         public float Delay;
-        
+
         public OnChangeScene(string sceneName, float delay = 1f)
         {
             SceneName = sceneName;
@@ -43,8 +43,17 @@ namespace ProjectLightsOut.Managers
     }
 
     public class OnFadeBlack : GameEvent
-    {}
-    
+    { }
+
     public class OnGameOver : GameEvent
-    {}
+    { }
+
+    public class OnPause : GameEvent
+    {
+        public bool IsPaused;
+        public OnPause(bool isPaused)
+        {
+            IsPaused = isPaused;
+        }    
+    }
 }

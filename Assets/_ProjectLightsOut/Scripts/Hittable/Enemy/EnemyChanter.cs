@@ -101,9 +101,9 @@ public class EnemyChanter : Enemy
     {
         while (true)
         {
-            yield return new WaitForSeconds(0.65f);
+            yield return new WaitForSeconds(0.5f);
             EventManager.Broadcast(new OnEnemyChant());
-            yield return new WaitForSeconds(0.65f);
+            yield return new WaitForSeconds(0.5f);
         }
     }
 }

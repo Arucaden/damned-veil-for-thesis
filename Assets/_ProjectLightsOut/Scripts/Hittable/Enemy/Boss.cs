@@ -82,10 +82,10 @@ namespace ProjectLightsOut.Gameplay
         {
             if (e.buffType == BuffType.Health)
             {
-                if (health < MaxHealth)
-                {
-                    health += 1;
-                }
+                // if (health < MaxHealth)
+                // {
+                //     health += 1;
+                // }
 
                 OnBossHealed?.Invoke();
             }

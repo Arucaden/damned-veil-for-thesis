@@ -14,8 +14,8 @@ public class MenuPlayButtonUI : MonoBehaviour
         if (isPressed) return;
 
         isPressed = true;
-        EventManager.Broadcast(new OnChangeGameState(GameState.InGame));
-        StartCoroutine(FadeOut());
+        AppStateManager.Instance.StartGameplay();
+        // StartCoroutine(FadeOut());
         EventManager.Broadcast(new OnPlaySFX("Boom1"));
     }
 

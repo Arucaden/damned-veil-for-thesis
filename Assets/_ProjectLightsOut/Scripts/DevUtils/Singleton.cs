@@ -17,6 +17,7 @@ namespace ProjectLightsOut.DevUtils
 
             Instance = this as T;
         }
+        
         #endregion
 
         #region Private methods

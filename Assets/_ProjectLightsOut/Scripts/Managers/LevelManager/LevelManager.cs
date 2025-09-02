@@ -107,11 +107,11 @@ namespace ProjectLightsOut.Managers
         {
             EventManager.Broadcast(new OnPlayerEnableShooting(false));
 
-            if (GameManager.WaitForLag)
-            {
-                yield return new WaitForSeconds(2f);
-                GameManager.WaitForLag = false;
-            }
+            // if (GameManager.WaitForLag)
+            // {
+            //     yield return new WaitForSeconds(2f);
+            //     GameManager.WaitForLag = false;
+            // }
 
             yield return new WaitForSeconds(1f);
 

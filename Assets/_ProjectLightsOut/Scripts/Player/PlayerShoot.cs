@@ -52,7 +52,7 @@ namespace ProjectLightsOut.Gameplay
         public Action OnShoot;
         private Coroutine reloadCoroutine;
                 
-        // ========================
+        //========================
 
         private void Awake()
         {

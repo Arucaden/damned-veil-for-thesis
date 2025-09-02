@@ -9,6 +9,7 @@ namespace ProjectLightsOut.Managers
     {
         MainMenu,
         InGame,
+        Paused,
         GameOver
     }
 
@@ -16,12 +17,9 @@ namespace ProjectLightsOut.Managers
     {
         private Coroutine resetTimeScaleCoroutine;
         private GameState gameState = GameState.MainMenu;
-        private bool waitForLag = true;
-        public static bool WaitForLag { get => Instance.waitForLag; set => Instance.waitForLag = value; }
         private Action OnSceneLoadComplete;
         private bool isPaused = false;
         public static bool IsPaused => Instance.isPaused;
-
 
         protected override void Awake()
         {
@@ -50,8 +48,6 @@ namespace ProjectLightsOut.Managers
             {
                 EventManager.Broadcast(new OnPlayBGM("MainMenu", fadeIn: 10f));
             }
-
-            waitForLag = true;
         }
 
         private void Update()
@@ -64,18 +60,13 @@ namespace ProjectLightsOut.Managers
             }
         }
 
-        private void OnSceneLoaded()
-        {
-            OnSceneLoadComplete?.Invoke();
-            OnSceneLoadComplete = null;
-        }
+        // private void OnSceneLoaded()
+        // {
+        //     OnSceneLoadComplete?.Invoke();
+        //     OnSceneLoadComplete = null;
+        // }
 
-        private void OnChangeScene(OnChangeScene evt)
-        {
-            StartCoroutine(ChangeScene(evt.Delay, evt.SceneName));
-        }
-
-        private void OnChangeGameState(OnChangeGameState evt)
+        public void OnChangeGameState(OnChangeGameState evt)
         {
             switch (evt.GameState)
             {
@@ -85,7 +76,7 @@ namespace ProjectLightsOut.Managers
                     Cursor.visible = true;
                     break;
                 case GameState.InGame:
-                    StartCoroutine(ChangeScene(1f, "0-0"));
+                    // StartCoroutine(ChangeScene(1f, "0-0"));
                     EventManager.Broadcast(new OnPlayBGM("Gameplay"));
                     Cursor.visible = false;
                     break;
@@ -120,14 +111,20 @@ namespace ProjectLightsOut.Managers
             Time.timeScale = 1f;
         }
 
-        private IEnumerator ChangeScene(float delay, string sceneName)
+        private void OnChangeScene(OnChangeScene evt)
         {
-            yield return new WaitForSeconds(delay);
-            UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene, mode) => OnSceneLoaded();
+            // StartCoroutine(ChangeScene(evt.Delay, evt.SceneName));
+            AppStateManager.Instance.GoToLevelSelect(evt.SceneName);
         }
 
-        #region Pause pause tolol
+        // private IEnumerator ChangeScene(float delay, string sceneName)
+        // {
+        //     yield return new WaitForSeconds(delay);
+        //     UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
+        //     UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene, mode) => OnSceneLoaded();
+        // }
+
+        #region Pause
         private void TogglePause()
         {
             isPaused = !isPaused;
@@ -163,7 +160,6 @@ namespace ProjectLightsOut.Managers
         }
             
         #endregion
-
 
     }
 }

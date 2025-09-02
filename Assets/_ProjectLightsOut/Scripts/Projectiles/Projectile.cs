@@ -34,7 +34,7 @@ namespace ProjectLightsOut.Gameplay
 
         private void FixedUpdate()
         {
-            rb.velocity = direction;
+            rb.linearVelocity = direction;
         }
 
         public void SetDirection(Vector2 direction)

@@ -1,4 +1,7 @@
+using System.Collections;
 using ProjectLightsOut.Managers;
+using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ProjectLightsOut.DevUtils
 {
@@ -22,6 +25,25 @@ namespace ProjectLightsOut.DevUtils
 
         void Start()
         {
+#if UNITY_EDITOR
+            {
+                StartCoroutine(ShowSplashScreen());
+            }
+            #else
+            {
+                GoToMainMenu();
+            }
+            #endif
+        }
+
+        private IEnumerator ShowSplashScreen()
+        {
+            SplashScreen.Begin();
+            while (!SplashScreen.isFinished)
+            {
+                SplashScreen.Draw();
+                yield return null;
+            }
             GoToMainMenu();
         }
 

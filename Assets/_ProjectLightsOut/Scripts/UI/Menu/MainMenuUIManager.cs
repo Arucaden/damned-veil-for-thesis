@@ -3,18 +3,33 @@ using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Managers;
 using UnityEngine;
 
-public class MenuPlayButtonUI : MonoBehaviour
+public class MainMenuUIManager : MonoBehaviour
 {
     [SerializeField] private CanvasGroup canvasGroup;
     private bool isPressed = false;
 
-    public void OnClick()
+    public void OnPlayButtonClick()
     {
         if (isPressed) return;
 
         isPressed = true;
         AppStateManager.Instance.StartGameplay();
         EventManager.Broadcast(new OnPlaySFX("Boom1"));
+    }
+
+    public void OnExitButtonClick()
+    {
+        Debug.Log("Exit button clicked");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        Application.Quit();
+        #endif
+    }
+
+    public void OnSettingsButtonClick()
+    {
+        Debug.Log("Settings button clicked");
     }
 
     private IEnumerator FadeOut()

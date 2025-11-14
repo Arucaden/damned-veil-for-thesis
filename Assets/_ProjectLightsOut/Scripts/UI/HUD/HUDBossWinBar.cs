@@ -34,13 +34,19 @@ public class HUDBossWinBar : MonoBehaviour
     {
         if (chantTime > 0 && lastChantTime > 0)
         {
-            lastChantTime -= Time.deltaTime;
+            lastChantTime -= Time.unscaledDeltaTime;
         }
 
         else if (chantTime > 0)
         {
-            chantTime -= Time.deltaTime;
+            chantTime -= Time.unscaledDeltaTime;
             chantBar.rectTransform.sizeDelta = new Vector2(fullBar * (chantTime / loseChantTime), chantBar.rectTransform.sizeDelta.y);
+            
+            // Check for game over even during pause - prevents cheating
+            if (chantTime >= loseChantTime)
+            {
+                EventManager.Broadcast(new OnTriggerGameOver());
+            }
         }
     }
 
@@ -97,7 +103,7 @@ public class HUDBossWinBar : MonoBehaviour
 
         while (time < duration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             chantBar.color = Color.Lerp(originalColor, Color.red, time / duration);
             yield return null;
         }
@@ -105,7 +111,7 @@ public class HUDBossWinBar : MonoBehaviour
         time = 0;
         while (time < duration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             chantBar.color = Color.Lerp(Color.red, originalColor, time / duration);
             yield return null;
         }
@@ -123,7 +129,7 @@ public class HUDBossWinBar : MonoBehaviour
 
         while (time < duration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             rectTransform.anchoredPosition = Vector2.Lerp(currentPos, retractPosition, time / duration);
             canvasGroup.alpha = Mathf.Lerp(1, 0f, time / duration);
             yield return null;
@@ -141,7 +147,7 @@ public class HUDBossWinBar : MonoBehaviour
 
         while (time < duration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             rectTransform.anchoredPosition = Vector2.Lerp(currentPos, originalPosition, time / duration);
             canvasGroup.alpha = Mathf.Lerp(0, 1f, time / duration);
             yield return null;

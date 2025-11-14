@@ -102,6 +102,14 @@ public class HUDBossHealthBar : MonoBehaviour
         {
             StartCoroutine(Retract());
         }
+        else
+        {
+            // When re-enabling shooting (unpausing), extend the health bar back
+            if (boss != null && healthBar.gameObject.activeSelf)
+            {
+                StartCoroutine(Extend());
+            }
+        }
     }
 
     private void OnBossReady(OnBossReady e)
@@ -132,7 +140,7 @@ public class HUDBossHealthBar : MonoBehaviour
 
         while (time < duration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime; // Use unscaled time to work during pause
             rectTransform.anchoredPosition = Vector2.Lerp(currentPos, retractPosition, time / duration);
             canvasGroup.alpha = Mathf.Lerp(1, 0f, time / duration);
             yield return null;
@@ -151,7 +159,7 @@ public class HUDBossHealthBar : MonoBehaviour
 
         while (time < duration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime; // Use unscaled time to work during pause
             rectTransform.anchoredPosition = Vector2.Lerp(currentPos, originalPosition, time / duration);
             rectTransform.localScale = Vector2.Lerp(originalScale, originalScale * 1.15f, time / duration);
             canvasGroup.alpha = Mathf.Lerp(0, 1f, time / duration);

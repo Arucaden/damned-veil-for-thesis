@@ -51,6 +51,7 @@ namespace ProjectLightsOut.Gameplay
         }
         public Action OnShoot;
         private Coroutine reloadCoroutine;
+        private bool wasReloadingWhenPaused = false;
                 
         //========================
 
@@ -88,7 +89,14 @@ namespace ProjectLightsOut.Gameplay
 
             if (reloadCoroutine != null && !IsFiringEnabled)
             {
+                wasReloadingWhenPaused = reloading; // Remember if we were reloading
                 StopCoroutine(reloadCoroutine);
+            }
+            else if (IsFiringEnabled && wasReloadingWhenPaused)
+            {
+                // If we were reloading when paused, resume the reload
+                wasReloadingWhenPaused = false;
+                reloadCoroutine = StartCoroutine(ReloadCoroutine(bullets));
             }
         }
 
@@ -122,14 +130,17 @@ namespace ProjectLightsOut.Gameplay
             lineRendererRicochet.colorGradient = reloadGradient;
         }
 
-        private IEnumerator ReloadCoroutine(int bullets = 6)
+        private IEnumerator ReloadCoroutine(int bulletsToReload = 6)
         {
             reloading = true;
             float duration = 2f;
+            int startingBulletCount = Bullets;
+            int targetBulletCount = Mathf.Min(startingBulletCount + bulletsToReload, LevelManager.LevelData.Bullets);
+            float interval = duration / bulletsToReload;
 
-            for (int i = 0; i < bullets; i++)
+            for (int i = startingBulletCount; i < targetBulletCount; i++)
             {
-                yield return new WaitForSeconds(duration / bullets);
+                yield return new WaitForSecondsRealtime(interval); // Use realtime to work during pause
                 Bullets++;
                 EventManager.Broadcast(new OnBulletReload(1));
             }

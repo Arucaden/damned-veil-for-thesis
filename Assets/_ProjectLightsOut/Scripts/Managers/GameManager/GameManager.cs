@@ -109,7 +109,7 @@ namespace ProjectLightsOut.Managers
         #region Pause
         private void TogglePause()
         {
-            if (gameState == GameState.Paused || gameState == GameState.GameOver)
+            if (gameState != GameState.Playing)
                 return;
 
             isPaused = !isPaused;
@@ -133,11 +133,7 @@ namespace ProjectLightsOut.Managers
             
             Cursor.visible = false;
             
-            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            
-            await SceneLoader.SwitchToAsync(currentSceneName);
-            
-            EventManager.Broadcast(new OnChangeGameState(GameState.Playing));
+            AppStateManager.Instance.RestartGameplay(LevelManager.Instance.LevelName);
         }
 
         public void ResumeGame()

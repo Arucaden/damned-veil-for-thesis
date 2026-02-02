@@ -24,6 +24,7 @@
   <Project Path="Unity.VisualStudio.Editor.csproj" />
   <Project Path="Unity.AI.Animate.csproj" />
   <Project Path="Unity.AI.Toolkit.Accounts.csproj" />
+  <Project Path="Project.csproj" />
   <Project Path="Unity.InferenceEngine.csproj" />
   <Project Path="Unity.2D.Animation.Editor.csproj" />
   <Project Path="Unity.Searcher.Editor.csproj" />
@@ -50,7 +51,6 @@
   <Project Path="Unity.Burst.Editor.csproj" />
   <Project Path="Unity.2D.Common.Path.Editor.csproj" />
   <Project Path="Unity.2D.Common.Editor.csproj" />
-  <Project Path="Project.csproj" />
   <Project Path="Unity.Rider.Editor.csproj" />
   <Project Path="Unity.VisualScripting.State.csproj" />
   <Project Path="Unity.InternalAPIEditorBridge.001.csproj" />
@@ -84,10 +84,13 @@
   <Project Path="Unity.AI.Assistant.Bridge.Editor.csproj" />
   <Project Path="Unity.AI.Toolkit.Asset.csproj" />
   <Project Path="Unity.2D.PixelPerfect.csproj" />
+  <Project Path="Unity.SysrootPackage.Editor.csproj" />
   <Project Path="Unity.Serialization.Editor.csproj" />
   <Project Path="Unity.AI.Assistant.AvatarHelper.Editor.csproj" />
   <Project Path="Unity.AI.Animate.Motion.Runtime.csproj" />
   <Project Path="ScriptablePacker.csproj" />
+  <Project Path="Unity.Toolchain.Linux-x86_64.csproj" />
+  <Project Path="Unity.Sysroot.Linux_x86_64.csproj" />
   <Project Path="Unity.InferenceEngine.MacBLAS.csproj" />
   <Project Path="Unity.AppUI.InternalAPIBridge.csproj" />
   <Project Path="Unity.AI.Toolkit.GenerationObjectPicker.csproj" />

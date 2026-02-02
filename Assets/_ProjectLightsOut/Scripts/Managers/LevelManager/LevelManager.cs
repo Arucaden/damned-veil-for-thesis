@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Gameplay;
 using UnityEngine;
+using DamnedVeil.ProceduralLogic.Orchestrator;
 
 namespace ProjectLightsOut.Managers
 {
@@ -266,6 +267,24 @@ namespace ProjectLightsOut.Managers
 
         private IEnumerator SpawnWave(WaveDataSO waveData)
         {
+            if (waveData.IsProcedural)
+            {
+                if (ProceduralEnemySpawner.Instance != null)
+                {
+                    bool success = ProceduralEnemySpawner.Instance.SpawnWave(waveData.ProceduralSettings);
+                    if (!success)
+                    {
+                        Debug.LogError($"[LevelManager] Failed to spawn procedural wave for {waveData.name}");
+                        // Optional: Trigger fallback or level completion?
+                    }
+                }
+                else
+                {
+                    Debug.LogError("[LevelManager] ProceduralEnemySpawner Instance is null! Cannot spawn procedural wave.");
+                }
+                yield break;
+            }
+
             foreach (var enemyData in waveData.Enemies)
             {
                 yield return new WaitForSeconds(enemyData.SpawnDelay);

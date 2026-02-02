@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3244339750839576784
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6879914842596157951}
+  - component: {fileID: 708672791331205540}
+  - component: {fileID: 2936603706708595509}
+  - component: {fileID: 1456623774842941032}
+  m_Layer: 0
+  m_Name: SpawnerManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6879914842596157951
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3244339750839576784}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.31855, y: -0.64789, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &708672791331205540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3244339750839576784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 634e3be442179096a8af01bdbe8d25ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::DamnedVeil.ProceduralLogic.PathGeneration.SpecularPathGenerator
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  maxBounces: 6
+  maxRayDistance: 100
+  showDebugGizmos: 1
+  pathColor: {r: 0, g: 1, b: 1, a: 1}
+--- !u!114 &2936603706708595509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3244339750839576784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13728671cdbd845dc82b1840bdd1c6fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::DamnedVeil.ProceduralLogic.CSP.CSPValidator
+  safeZoneRadius: 3
+  minEnemySpacing: 2
+  minEnemyCount: 2
+  maxEnemyCount: 5
+  samplingResolution: 0.5
+  endPathBuffer: 1
+  showDebugGizmos: 1
+  validPointColor: {r: 0, g: 1, b: 0, a: 1}
+  invalidPointColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &1456623774842941032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3244339750839576784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29c7b442833226510ad91718a9dfc75c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::DamnedVeil.ProceduralLogic.Orchestrator.ProceduralEnemySpawner
+  pathGenerator: {fileID: 708672791331205540}
+  cspValidator: {fileID: 2936603706708595509}
+  enemyPrefab: {fileID: 0}
+  playerTransform: {fileID: 0}
+  maxAttempts: 100
+  minPathLength: 5
+  pathLineRenderer: {fileID: 0}
+  showPath: 1
+  pathColor: {r: 0, g: 1, b: 1, a: 1}
+  logDebugInfo: 1

@@ -12,10 +12,15 @@ namespace ProjectLightsOut.Gameplay
         private int ricochetCount;
         private float destroyTimer = 10f;
         [SerializeField] private int maxRicochetCount = 3;
-        [SerializeField] private GameObject impactEffect;
-        [SerializeField] private GameObject hitEffect;
+        [SerializeField] private SimplePool impactPool;
+        [SerializeField] private SimplePool hitPool;
         private Action OnTargetHit;
         private int targetHit;
+
+        /// <summary>
+        /// Set by PlayerShoot so the projectile can return itself to the pool.
+        /// </summary>
+        [HideInInspector] public SimplePool ParentPool;
 
         private void Awake()
         {
@@ -106,23 +111,46 @@ namespace ProjectLightsOut.Gameplay
         private void DestroyProjectile()
         {
             EventManager.Broadcast(new OnProjectileDestroy());
-            Destroy(gameObject);
+            ResetProjectile();
+
+            if (ParentPool != null)
+            {
+                ParentPool.Return(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Resets all runtime state so the pooled object can be reused cleanly.
+        /// </summary>
+        public void ResetProjectile()
+        {
+            ricochetCount = 0;
+            targetHit = 0;
+            destroyTimer = 10f;
+            direction = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
         }
 
         private void SpawnEffect(Vector2 position, Vector2 normal)
         {
-            if (impactEffect == null) return;
+            if (impactPool == null) return;
 
-            Transform impactFx = Instantiate(impactEffect, position, Quaternion.identity).transform;
-            impactFx.right = normal;
+            GameObject impactFx = impactPool.Get(position, Quaternion.identity);
+            impactFx.transform.right = normal;
+            impactPool.Return(impactFx, 1f);
         }
 
         private void SpawnHitEffect(Vector2 position, Vector2 normal)
         {
-            if (hitEffect == null) return;
+            if (hitPool == null) return;
 
-            Transform hitFx = Instantiate(hitEffect, position, Quaternion.identity).transform;
-            hitFx.right = normal;
+            GameObject hitFx = hitPool.Get(position, Quaternion.identity);
+            hitFx.transform.right = normal;
+            hitPool.Return(hitFx, 1f);
         }
     }
 }

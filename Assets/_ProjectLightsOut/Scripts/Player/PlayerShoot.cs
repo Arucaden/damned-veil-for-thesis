@@ -23,6 +23,7 @@ namespace ProjectLightsOut.Gameplay
         }
 
         [SerializeField] private GameObject bulletPrefab;
+        [SerializeField] private SimplePool bulletPool;
         private CircleCollider2D bulletCollider;
         [SerializeField] private Transform bulletSpawnPoint;
         [SerializeField] private Transform laserSpawnPoint;
@@ -244,8 +245,14 @@ namespace ProjectLightsOut.Gameplay
 
             EventManager.Broadcast(new OnPlaySFX("Cast"));
 
-            GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
-            bullet.GetComponent<Projectile>().SetDirection(bulletSpawnPoint.up * bulletSpeed);
+            GameObject bullet = bulletPool != null
+                ? bulletPool.Get(bulletSpawnPoint.position, bulletSpawnPoint.rotation)
+                : Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
+
+            Projectile proj = bullet.GetComponent<Projectile>();
+            proj.ResetProjectile();
+            proj.ParentPool = bulletPool;
+            proj.SetDirection(bulletSpawnPoint.up * bulletSpeed);
 
             Bullets--;
             EventManager.Broadcast(new OnProjectileShoot(bullets));

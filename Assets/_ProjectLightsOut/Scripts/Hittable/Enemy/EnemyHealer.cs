@@ -23,25 +23,22 @@ public class EnemyHealer : Enemy
 
     private void OnEnable()
     {
-        OnSpawned += () =>
-        {
-            Buff();
-        };
+        OnSpawned += HandleSpawned;
 
         EventManager.AddListener<OnBossDead>(OnBossDead);
     }
 
     private void OnDisable()
     {
-        OnSpawned -= () =>
-        {
-            Buff();
-        };
-
-
+        OnSpawned -= HandleSpawned;
 
         EventManager.RemoveListener<OnBossDead>(OnBossDead);
         EventManager.RemoveListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
+    }
+
+    private void HandleSpawned()
+    {
+        Buff();
     }
 
     private void OnPlayerEnableShooting(OnPlayerEnableShooting evt)
@@ -88,10 +85,7 @@ public class EnemyHealer : Enemy
         chantEffect.SetActive(false);
         shadowRenderer.enabled = false;
 
-        OnSpawned -= () =>
-        {
-            Buff();
-        };
+        OnSpawned -= HandleSpawned;
 
         if (chantCoroutine == null) return;
         StopCoroutine(chantCoroutine);

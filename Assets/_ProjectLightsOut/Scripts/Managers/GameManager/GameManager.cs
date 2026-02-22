@@ -29,20 +29,19 @@ namespace ProjectLightsOut.Managers
         {
             EventManager.AddListener<OnSlowTime>(OnSlowTimeEvent);
             EventManager.AddListener<OnChangeGameState>(OnChangeGameState);
-            EventManager.AddListener<OnGameOver>(evt =>
-            {
-                gameState = GameState.GameOver;
-            });
+            EventManager.AddListener<OnGameOver>(OnGameOverEvent);
         }
 
         private void OnDisable()
         {
             EventManager.RemoveListener<OnSlowTime>(OnSlowTimeEvent);
             EventManager.RemoveListener<OnChangeGameState>(OnChangeGameState);
-            EventManager.RemoveListener<OnGameOver>(evt =>
-            {
-                gameState = GameState.GameOver;
-            });
+            EventManager.RemoveListener<OnGameOver>(OnGameOverEvent);
+        }
+
+        private void OnGameOverEvent(OnGameOver evt)
+        {
+            gameState = GameState.GameOver;
         }
 
         private void Start()

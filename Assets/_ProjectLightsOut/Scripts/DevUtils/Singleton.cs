@@ -17,6 +17,14 @@ namespace ProjectLightsOut.DevUtils
 
             Instance = this as T;
         }
+
+        protected virtual void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
         
         #endregion
 

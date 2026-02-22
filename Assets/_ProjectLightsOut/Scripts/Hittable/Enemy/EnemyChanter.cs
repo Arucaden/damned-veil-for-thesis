@@ -17,10 +17,7 @@ public class EnemyChanter : Enemy
 
     private void OnEnable()
     {
-        OnSpawned += () =>
-        {
-            Chant();
-        };
+        OnSpawned += HandleSpawned;
 
         EventManager.AddListener<OnTriggerGameOver>(OnGameOver);
         EventManager.AddListener<OnBossDead>(OnBossDead);
@@ -28,15 +25,16 @@ public class EnemyChanter : Enemy
 
     private void OnDisable()
     {
-        OnSpawned -= () =>
-        {
-            Chant();
-        };
+        OnSpawned -= HandleSpawned;
 
         EventManager.RemoveListener<OnTriggerGameOver>(OnGameOver);
         EventManager.RemoveListener<OnBossDead>(OnBossDead);
     }
 
+    private void HandleSpawned()
+    {
+        Chant();
+    }
     private void OnBossDead(OnBossDead evt)
     {
         OnHit(1, null);
@@ -88,10 +86,7 @@ public class EnemyChanter : Enemy
         chantEffect.SetActive(false);
         shadowRenderer.enabled = false;
 
-        OnSpawned -= () =>
-        {
-            Chant();
-        };
+        OnSpawned -= HandleSpawned;
 
         if (chantCoroutine == null) return;
         StopCoroutine(chantCoroutine);

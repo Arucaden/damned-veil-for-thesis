@@ -1,5 +1,8 @@
-public struct GridSize
+namespace ProjectLightsOut.Managers
 {
-    public int width;
-    public int height;
+    public struct GridSize
+    {
+        public int width;
+        public int height;
+    }
 }

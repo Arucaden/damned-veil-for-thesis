@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using ProjectLightsOut.DevUtils;
 using UnityEngine;
 
-public class EnemyShielder : EnemyHealer
+namespace ProjectLightsOut.Gameplay
 {
-    protected override IEnumerator Buffing()
+    public class EnemyShielder : EnemyHealer
     {
-        while (true)
+        protected override IEnumerator Buffing()
         {
-            yield return new WaitForSeconds(0.2f);
+            while (true)
+            {
+                yield return new WaitForSeconds(0.2f);
 
-            chantEffectAnimator.SetTrigger("Buff");
+                chantEffectAnimator.SetTrigger("Buff");
 
-            EventManager.Broadcast(new OnBossBuff(BuffType.Shield));
+                EventManager.Broadcast(new OnBossBuff(BuffType.Shield));
+            }
         }
     }
 }

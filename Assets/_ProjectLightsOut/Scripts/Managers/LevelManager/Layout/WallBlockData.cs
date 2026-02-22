@@ -1,11 +1,14 @@
 using UnityEngine;
 
-public struct WallBlockData
+namespace ProjectLightsOut.Managers
 {
-    public RectInt area;
+    public struct WallBlockData
+    {
+        public RectInt area;
 
-    public WallEdgeData top;
-    public WallEdgeData bottom;
-    public WallEdgeData left;
-    public WallEdgeData right;
+        public WallEdgeData top;
+        public WallEdgeData bottom;
+        public WallEdgeData left;
+        public WallEdgeData right;
+    }
 }

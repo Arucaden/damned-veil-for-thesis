@@ -2,103 +2,105 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using ProjectLightsOut.DevUtils;
-using ProjectLightsOut.Gameplay;
 using ProjectLightsOut.Managers;
 using UnityEngine;
 
-public class OnEnemyChant : GameEvent
-{}
-
-public class EnemyChanter : Enemy
+namespace ProjectLightsOut.Gameplay
 {
-    [SerializeField] private Animator chantEffectAnimator;
-    [SerializeField] private GameObject chantEffect;
-    private Coroutine chantCoroutine;
+    public class OnEnemyChant : GameEvent
+    {}
 
-    private void OnEnable()
+    public class EnemyChanter : Enemy
     {
-        OnSpawned += HandleSpawned;
+        [SerializeField] private Animator chantEffectAnimator;
+        [SerializeField] private GameObject chantEffect;
+        private Coroutine chantCoroutine;
 
-        EventManager.AddListener<OnTriggerGameOver>(OnGameOver);
-        EventManager.AddListener<OnBossDead>(OnBossDead);
-    }
-
-    private void OnDisable()
-    {
-        OnSpawned -= HandleSpawned;
-
-        EventManager.RemoveListener<OnTriggerGameOver>(OnGameOver);
-        EventManager.RemoveListener<OnBossDead>(OnBossDead);
-    }
-
-    private void HandleSpawned()
-    {
-        Chant();
-    }
-    private void OnBossDead(OnBossDead evt)
-    {
-        OnHit(1, null);
-    }
-
-    private void OnGameOver(OnTriggerGameOver evt)
-    {
-        StopCoroutine(chantCoroutine);
-    }
-
-    protected override void Awake()
-    {
-        base.Awake();
-        chantEffectAnimator.enabled = false;
-        chantEffect.SetActive(false);
-    }
-
-    private void Chant()
-    {
-        if (!LevelManager.IsPlayerShootEnabled)
+        private void OnEnable()
         {
-            EventManager.AddListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
-            return;
+            OnSpawned += HandleSpawned;
+
+            EventManager.AddListener<OnTriggerGameOver>(OnGameOver);
+            EventManager.AddListener<OnBossDead>(OnBossDead);
         }
 
-        if (!IsHittable) return;
-
-        chantEffectAnimator.enabled = true;
-        chantEffect.SetActive(true);
-        chantCoroutine = StartCoroutine(Chanting());
-    }
-
-    private void OnPlayerEnableShooting(OnPlayerEnableShooting evt)
-    {
-        if (evt.IsEnabled)
+        private void OnDisable()
         {
-            EventManager.RemoveListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
-            if (chantEffectAnimator == null) return;
+            OnSpawned -= HandleSpawned;
+
+            EventManager.RemoveListener<OnTriggerGameOver>(OnGameOver);
+            EventManager.RemoveListener<OnBossDead>(OnBossDead);
+        }
+
+        private void HandleSpawned()
+        {
+            Chant();
+        }
+        private void OnBossDead(OnBossDead evt)
+        {
+            OnHit(1, null);
+        }
+
+        private void OnGameOver(OnTriggerGameOver evt)
+        {
+            StopCoroutine(chantCoroutine);
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            chantEffectAnimator.enabled = false;
+            chantEffect.SetActive(false);
+        }
+
+        private void Chant()
+        {
+            if (!LevelManager.IsPlayerShootEnabled)
+            {
+                EventManager.AddListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
+                return;
+            }
+
+            if (!IsHittable) return;
+
             chantEffectAnimator.enabled = true;
             chantEffect.SetActive(true);
             chantCoroutine = StartCoroutine(Chanting());
         }
-    }
 
-    public override void OnHit(int multiplier, Action OnTargetHit)
-    {
-        base.OnHit(multiplier, OnTargetHit);
-        chantEffectAnimator.enabled = false;
-        chantEffect.SetActive(false);
-        shadowRenderer.enabled = false;
-
-        OnSpawned -= HandleSpawned;
-
-        if (chantCoroutine == null) return;
-        StopCoroutine(chantCoroutine);
-    }
-
-    private IEnumerator Chanting()
-    {
-        while (true)
+        private void OnPlayerEnableShooting(OnPlayerEnableShooting evt)
         {
-            yield return new WaitForSeconds(0.5f);
-            EventManager.Broadcast(new OnEnemyChant());
-            yield return new WaitForSeconds(0.5f);
+            if (evt.IsEnabled)
+            {
+                EventManager.RemoveListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
+                if (chantEffectAnimator == null) return;
+                chantEffectAnimator.enabled = true;
+                chantEffect.SetActive(true);
+                chantCoroutine = StartCoroutine(Chanting());
+            }
+        }
+
+        public override void OnHit(int multiplier, Action OnTargetHit)
+        {
+            base.OnHit(multiplier, OnTargetHit);
+            chantEffectAnimator.enabled = false;
+            chantEffect.SetActive(false);
+            shadowRenderer.enabled = false;
+
+            OnSpawned -= HandleSpawned;
+
+            if (chantCoroutine == null) return;
+            StopCoroutine(chantCoroutine);
+        }
+
+        private IEnumerator Chanting()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(0.5f);
+                EventManager.Broadcast(new OnEnemyChant());
+                yield return new WaitForSeconds(0.5f);
+            }
         }
     }
 }

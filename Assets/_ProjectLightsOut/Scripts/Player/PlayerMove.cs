@@ -5,65 +5,68 @@ using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Managers;
 using UnityEngine;
 
-public class PlayerMove : MonoBehaviour
+namespace ProjectLightsOut.Gameplay
 {
-    [SerializeField] private float moveSpeed = 5f;
-    private bool isMoving = false;
-    private List<Transform> waypoints = new List<Transform>();
-    public Action<bool> OnPlayerMoving;
-    [SerializeField] private AudioSource footstepAudioSource;
-    [SerializeField] private List<AudioClip> footstepClips = new List<AudioClip>();
-
-    private void Update()
+    public class PlayerMove : MonoBehaviour
     {
-        Move();
-    }
+        [SerializeField] private float moveSpeed = 5f;
+        private bool isMoving = false;
+        private List<Transform> waypoints = new List<Transform>();
+        public Action<bool> OnPlayerMoving;
+        [SerializeField] private AudioSource footstepAudioSource;
+        [SerializeField] private List<AudioClip> footstepClips = new List<AudioClip>();
 
-    private void OnEnable()
-    {
-        EventManager.AddListener<OnPlayerMove>(OnPlayerMove);
-    }
-
-    private void OnDisable()
-    {
-        EventManager.RemoveListener<OnPlayerMove>(OnPlayerMove);
-    }
-
-    private void OnPlayerMove(OnPlayerMove evt)
-    {
-        isMoving = evt.IsMoving;
-        waypoints = evt.Waypoints;
-        OnPlayerMoving?.Invoke(isMoving);
-    }
-
-    private void Move()
-    {
-        if (!isMoving)
+        private void Update()
         {
-            return;
+            Move();
         }
 
-        if (waypoints.Count > 0)
+        private void OnEnable()
         {
-            transform.position = Vector2.MoveTowards(transform.position, waypoints[0].position, moveSpeed * Time.deltaTime);
-            if (Vector2.Distance(transform.position, waypoints[0].position) < 0.1f)
+            EventManager.AddListener<OnPlayerMove>(OnPlayerMove);
+        }
+
+        private void OnDisable()
+        {
+            EventManager.RemoveListener<OnPlayerMove>(OnPlayerMove);
+        }
+
+        private void OnPlayerMove(OnPlayerMove evt)
+        {
+            isMoving = evt.IsMoving;
+            waypoints = evt.Waypoints;
+            OnPlayerMoving?.Invoke(isMoving);
+        }
+
+        private void Move()
+        {
+            if (!isMoving)
             {
-                waypoints.RemoveAt(0);
+                return;
+            }
+
+            if (waypoints.Count > 0)
+            {
+                transform.position = Vector2.MoveTowards(transform.position, waypoints[0].position, moveSpeed * Time.deltaTime);
+                if (Vector2.Distance(transform.position, waypoints[0].position) < 0.1f)
+                {
+                    waypoints.RemoveAt(0);
+                }
+            }
+
+            else
+            {
+                isMoving = false;
+                OnPlayerMoving?.Invoke(isMoving);
+                EventManager.Broadcast(new OnPlayerFinishMove());
             }
         }
 
-        else
+
+        public void PlayFootstepSound()
         {
-            isMoving = false;
-            OnPlayerMoving?.Invoke(isMoving);
-            EventManager.Broadcast(new OnPlayerFinishMove());
+            footstepAudioSource.clip = footstepClips[UnityEngine.Random.Range(0, footstepClips.Count)];
+            footstepAudioSource.Play();
         }
-    }
-
-
-    public void PlayFootstepSound()
-    {
-        footstepAudioSource.clip = footstepClips[UnityEngine.Random.Range(0, footstepClips.Count)];
-        footstepAudioSource.Play();
     }
 }

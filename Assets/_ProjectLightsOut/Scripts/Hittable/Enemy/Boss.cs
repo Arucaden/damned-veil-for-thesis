@@ -225,15 +225,18 @@ namespace ProjectLightsOut.Gameplay
 
             if (spawnCooldown <= 0)
             {
-                List<WaveDataSO> waveCache = new List<WaveDataSO>();
+                // Use the correct wave list based on current phase
+                List<WaveDataSO> sourceWaves = isSecondPhase ? secondPhaseWaves : firstPhaseWaves;
+                List<WaveDataSO> waveCache = new List<WaveDataSO>(sourceWaves);
                 waveCache.RemoveAll(x => activeWaves.Exists(y => y.waveData == x));
 
                 if (waveCache.Count == 0)
                 {
-                    waveCache = firstPhaseWaves;
+                    // All waves are active — fallback to full list
+                    waveCache = new List<WaveDataSO>(sourceWaves);
                 }
 
-                int random = UnityEngine.Random.Range(0, waveCache.Count - 1);
+                int random = UnityEngine.Random.Range(0, waveCache.Count);
                 LevelManager.SpawnEnemyWave(waveCache[random]);
                 ActiveWaveData activeWaveData = new ActiveWaveData();
                 activeWaveData.waveData = waveCache[random];

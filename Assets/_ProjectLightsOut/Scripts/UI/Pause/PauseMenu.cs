@@ -11,12 +11,10 @@ public class PauseMenu : MonoBehaviour
     {
         if (pauseEvent.IsPaused)
         {
-            Time.timeScale = 0f;
             _pauseUI.SetActive(true);
         }
         else
         {
-            Time.timeScale = 1f;
             _pauseUI.SetActive(false);
         }
     }

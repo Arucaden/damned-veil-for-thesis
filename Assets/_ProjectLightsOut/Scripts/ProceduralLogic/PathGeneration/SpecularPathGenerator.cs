@@ -11,7 +11,10 @@ namespace DamnedVeil.ProceduralLogic.PathGeneration
     public class SpecularPathGenerator : MonoBehaviour
     {
         [Header("Raycast Settings")]
-        [SerializeField] private LayerMask wallLayer;
+        [Tooltip("Layers to EXCLUDE from raycast (same as PlayerShoot). Walls/environment are hit automatically.")]
+        [SerializeField] private LayerMask excludeLayers;
+        [Tooltip("Tag that marks a surface as bounceable (must match Projectile collision tag)")]
+        [SerializeField] private string bounceTag = "Ricochet";
         [SerializeField] private int maxBounces = 6;
         [SerializeField] private float maxRayDistance = 100f;
 
@@ -28,7 +31,7 @@ namespace DamnedVeil.ProceduralLogic.PathGeneration
         /// <param name="origin">Starting position (typically player position)</param>
         /// <param name="direction">Initial bullet direction (normalized)</param>
         /// <returns>SpecularPathData containing all trajectory points</returns>
-        public SpecularPathData GeneratePath(Vector2 origin, Vector2 direction)
+        public SpecularPathData GeneratePath(Vector2 origin, Vector2 direction, int maxBouncesOverride = -1)
         {
             SpecularPathData pathData = new SpecularPathData();
 
@@ -38,14 +41,19 @@ namespace DamnedVeil.ProceduralLogic.PathGeneration
             Vector2 currentPosition = origin;
             Vector2 currentDirection = direction.normalized;
             float totalLength = 0f;
+            int effectiveMaxBounces = maxBouncesOverride > 0 ? maxBouncesOverride : maxBounces;
 
-            for (int bounce = 0; bounce < maxBounces; bounce++)
+            // Build the raycast mask: hit everything EXCEPT excluded layers
+            // This matches PlayerShoot.cs approach: exclude "Ignore Laser" and "Projectile"
+            LayerMask raycastMask = ~excludeLayers;
+
+            for (int bounce = 0; bounce < effectiveMaxBounces; bounce++)
             {
                 RaycastHit2D hit = Physics2D.Raycast(
                     currentPosition,
                     currentDirection,
                     maxRayDistance,
-                    wallLayer
+                    raycastMask
                 );
 
                 if (hit.collider != null)
@@ -54,16 +62,25 @@ namespace DamnedVeil.ProceduralLogic.PathGeneration
                     float segmentLength = Vector2.Distance(currentPosition, hit.point);
                     totalLength += segmentLength;
 
-                    // Add bounce point
+                    // Add hit point to path
                     pathData.PathPoints.Add(new TrajectoryPoint(
                         hit.point,
                         hit.normal,
                         bounce + 1
                     ));
 
-                    // Calculate reflected direction
-                    currentDirection = Vector2.Reflect(currentDirection, hit.normal);
-                    currentPosition = hit.point + (currentDirection * 0.01f); // Small offset to avoid self-collision
+                    // Only bounce if the surface has the correct tag (same as Projectile.cs)
+                    if (hit.collider.CompareTag(bounceTag))
+                    {
+                        // Calculate reflected direction
+                        currentDirection = Vector2.Reflect(currentDirection, hit.normal);
+                        currentPosition = hit.point + (currentDirection * 0.01f); // Small offset to avoid self-collision
+                    }
+                    else
+                    {
+                        // Hit a non-bounceable surface — end the path here
+                        break;
+                    }
                 }
                 else
                 {
@@ -87,32 +104,18 @@ namespace DamnedVeil.ProceduralLogic.PathGeneration
         }
 
         /// <summary>
-        /// Generates a path in a random direction from the origin.
-        /// </summary>
-        public SpecularPathData GenerateRandomPath(Vector2 origin)
-        {
-            float randomAngle = Random.Range(0f, 360f);
-            Vector2 direction = new Vector2(
-                Mathf.Cos(randomAngle * Mathf.Deg2Rad),
-                Mathf.Sin(randomAngle * Mathf.Deg2Rad)
-            );
-            return GeneratePath(origin, direction);
-        }
-
-        /// <summary>
         /// Generates a path at a specific angle (in degrees).
         /// </summary>
-        public SpecularPathData GeneratePathAtAngle(Vector2 origin, float angleDegrees)
+        public SpecularPathData GeneratePathAtAngle(Vector2 origin, float angleDegrees, int maxBouncesOverride = -1)
         {
             Vector2 direction = new Vector2(
                 Mathf.Cos(angleDegrees * Mathf.Deg2Rad),
                 Mathf.Sin(angleDegrees * Mathf.Deg2Rad)
             );
-            return GeneratePath(origin, direction);
+            return GeneratePath(origin, direction, maxBouncesOverride);
         }
 
         public int MaxBounces => maxBounces;
-        public LayerMask WallLayer => wallLayer;
 
 #if UNITY_EDITOR
         private void OnDrawGizmos()

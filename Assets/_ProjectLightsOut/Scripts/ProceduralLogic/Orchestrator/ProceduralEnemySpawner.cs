@@ -5,6 +5,7 @@ using DamnedVeil.ProceduralLogic.PathGeneration;
 using DamnedVeil.ProceduralLogic.CSP;
 using ProjectLightsOut.Managers;
 using ProjectLightsOut.DevUtils;
+using ProjectLightsOut.Gameplay;
 
 namespace DamnedVeil.ProceduralLogic.Orchestrator
 {
@@ -17,7 +18,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
         [Header("References")]
         [SerializeField] private SpecularPathGenerator pathGenerator;
         [SerializeField] private CSPValidator cspValidator;
-        [SerializeField] private GameObject enemyPrefab;
 
         [Header("Spawning Settings")]
         [SerializeField] private Transform playerTransform;
@@ -38,12 +38,9 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
         private ProceduralWaveSettings lastSettings;
 
         /// <summary>
-        /// Attempts to spawn enemies using the PCG system.
-        /// </summary>
-        /// <returns>True if successful, false if failed after max attempts</returns>
-        /// <summary>
         /// Attempts to spawn enemies using the provided settings.
         /// </summary>
+        /// <returns>True if successful, false if failed after max attempts</returns>
         public bool SpawnWave(ProceduralWaveSettings settings)
         {
             if (playerTransform == null)
@@ -52,8 +49,9 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                 return false;
             }
 
-            // Apply overrides if provided
-            if (settings.MinPathLength > 0) minPathLength = settings.MinPathLength;
+            // Use local overrides if provided, don't mutate inspector defaults
+            float effectiveMinPathLength = settings.MinPathLength > 0 ? settings.MinPathLength : minPathLength;
+            int effectiveMaxBounces = settings.MaxBounces > 0 ? settings.MaxBounces : -1;
             lastSettings = settings; // Cache for Respawn
             
             ClearSpawnedEnemies();
@@ -67,20 +65,24 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
 
                 // 1. Specular Path Phase - Generate random path
                 float angle = UnityEngine.Random.Range(0f, 360f);
-                SpecularPathData path = pathGenerator.GeneratePathAtAngle(playerPosition, angle); // MaxBounces defaults to 6 in generator if not exposed
+                SpecularPathData path = pathGenerator.GeneratePathAtAngle(playerPosition, angle, effectiveMaxBounces);
 
                 // Validate path length
-                if (path.TotalLength < minPathLength)
+                if (path.TotalLength < effectiveMinPathLength)
                 {
-                    // Silent continue to avoid spam
                     continue;
                 }
 
                 // 2. CSP Phase - Validate and get enemy positions
-                // Update MinEnemyCount constraint temporarily for this solve
-                cspValidator.MinEnemyCount = settings.EnemyCount;
-                
-                List<EnemySpawnData> enemyPositions = cspValidator.Solve(path, playerPosition);
+                List<EnemySpawnData> enemyPositions = cspValidator.Solve(
+                    path,
+                    playerPosition,
+                    settings.EnemyCount,
+                    settings.SafeZoneRadius,
+                    settings.MinEnemySpacing,
+                    settings.EndPathBuffer,
+                    settings.WallBufferRadius
+                );
 
                 if (enemyPositions != null && enemyPositions.Count >= settings.EnemyCount)
                 {
@@ -106,17 +108,20 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             return false;
         }
 
-        // Deprecated/Removed old SpawnEnemies code block
-
         /// <summary>
         /// Spawns enemy prefabs at the validated positions.
         /// </summary>
         private void SpawnEnemiesAtPositions(List<EnemySpawnData> positions, List<GameObject> enemyPool)
         {
+            if (enemyPool == null || enemyPool.Count == 0)
+            {
+                Debug.LogError("[ProceduralEnemySpawner] EnemyPool is empty! Cannot spawn enemies.");
+                return;
+            }
+
             for (int i = 0; i < positions.Count; i++)
             {
                 var spawnData = positions[i];
-                // Select random enemy from pool
                 GameObject prefab = enemyPool[UnityEngine.Random.Range(0, enemyPool.Count)];
                 
                 GameObject enemyObj = Instantiate(
@@ -127,8 +132,13 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                 );
                 enemyObj.name = $"Enemy_Segment{spawnData.OnSegmentIndex}_{i}";
                 spawnedEnemies.Add(enemyObj);
-                
-                // Note: Enemy script automatically registers itself to LevelManager in Start()
+
+                // Trigger spawn animation (disables collider/sprite, plays VFX, re-enables after delay)
+                Enemy enemyComponent = enemyObj.GetComponent<Enemy>();
+                if (enemyComponent != null)
+                {
+                    enemyComponent.Spawn();
+                }
             }
         }
 

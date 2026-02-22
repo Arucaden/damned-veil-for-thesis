@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37ddf6c4f99bec3489c157007f29a719, type: 3}
   m_Name: TestDev_Wave1
   m_EditorClassIdentifier: 
-  Enemies:
-  - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
-    SpawnPosition: {x: -0.9309308, y: -1.969688}
-  - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
-    SpawnPosition: {x: 1.33, y: -1.06}
+  Enemies: []
+  IsProcedural: 1
+  ProceduralSettings:
+    EnemyCount: 2
+    EnemyPool:
+    - {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
+    MinPathLength: 1
+    MaxBounces: 4

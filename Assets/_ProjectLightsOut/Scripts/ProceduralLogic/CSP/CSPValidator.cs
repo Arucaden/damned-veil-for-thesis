@@ -10,7 +10,7 @@ namespace DamnedVeil.ProceduralLogic.CSP
     /// </summary>
     public class CSPValidator : MonoBehaviour
     {
-        [Header("Constraint Settings")]
+        [Header("Default Constraint Settings (used when wave doesn't override)")]
         [Tooltip("Minimum distance from player (Safe Zone - C3)")]
         [SerializeField] private float safeZoneRadius = 3f;
 
@@ -22,6 +22,12 @@ namespace DamnedVeil.ProceduralLogic.CSP
 
         [Tooltip("Maximum number of enemies to spawn")]
         [SerializeField] private int maxEnemyCount = 5;
+
+        [Tooltip("Minimum distance from walls (Wall Buffer - C5)")]
+        [SerializeField] private float wallBufferRadius = 0.5f;
+
+        [Tooltip("Tag used to identify bounceable wall colliders")]
+        [SerializeField] private string wallTag = "Ricochet";
 
         [Header("Sampling Settings")]
         [Tooltip("Resolution for sampling points along the path (in world units)")]
@@ -40,12 +46,23 @@ namespace DamnedVeil.ProceduralLogic.CSP
 
         /// <summary>
         /// Validates and selects enemy spawn positions from the given path.
+        /// All constraint parameters override the inspector defaults when > 0.
         /// </summary>
-        /// <param name="pathData">The specular path to place enemies on</param>
-        /// <param name="playerPosition">Current player position for safe zone check</param>
-        /// <returns>List of valid enemy spawn data, or null if constraints cannot be satisfied</returns>
-        public List<EnemySpawnData> Solve(SpecularPathData pathData, Vector2 playerPosition)
+        public List<EnemySpawnData> Solve(
+            SpecularPathData pathData,
+            Vector2 playerPosition,
+            int requiredEnemyCount = -1,
+            float overrideSafeZone = 0f,
+            float overrideSpacing = 0f,
+            float overrideEndBuffer = 0f,
+            float overrideWallBuffer = 0f)
         {
+            int effectiveMinCount = requiredEnemyCount > 0 ? requiredEnemyCount : minEnemyCount;
+            float effectiveSafeZone = overrideSafeZone > 0f ? overrideSafeZone : safeZoneRadius;
+            float effectiveSpacing = overrideSpacing > 0f ? overrideSpacing : minEnemySpacing;
+            float effectiveEndBuffer = overrideEndBuffer > 0f ? overrideEndBuffer : endPathBuffer;
+            float effectiveWallBuffer = overrideWallBuffer > 0f ? overrideWallBuffer : wallBufferRadius;
+
             if (pathData == null || pathData.PathPoints.Count < 2)
             {
                 Debug.LogWarning("[CSPValidator] Invalid path data provided.");
@@ -65,15 +82,15 @@ namespace DamnedVeil.ProceduralLogic.CSP
             foreach (var point in sampledPoints)
             {
                 float distanceToPlayer = Vector2.Distance(point.position, playerPosition);
-                if (distanceToPlayer > safeZoneRadius)
+                if (distanceToPlayer > effectiveSafeZone)
                 {
                     safeZoneFiltered.Add(point);
                 }
             }
 
-            if (safeZoneFiltered.Count < minEnemyCount)
+            if (safeZoneFiltered.Count < effectiveMinCount)
             {
-                Debug.LogWarning($"[CSPValidator] Not enough points after safe zone filter: {safeZoneFiltered.Count}/{minEnemyCount}");
+                Debug.LogWarning($"[CSPValidator] Not enough points after safe zone filter: {safeZoneFiltered.Count}/{effectiveMinCount}");
                 return null;
             }
 
@@ -83,20 +100,36 @@ namespace DamnedVeil.ProceduralLogic.CSP
             foreach (var point in safeZoneFiltered)
             {
                 float distanceToEnd = Vector2.Distance(point.position, pathEnd);
-                if (distanceToEnd > endPathBuffer)
+                if (distanceToEnd > effectiveEndBuffer)
                 {
                     bufferedPoints.Add(point);
                 }
             }
 
-            if (bufferedPoints.Count < minEnemyCount)
+            if (bufferedPoints.Count < effectiveMinCount)
             {
-                Debug.LogWarning($"[CSPValidator] Not enough points after end buffer filter: {bufferedPoints.Count}/{minEnemyCount}");
+                Debug.LogWarning($"[CSPValidator] Not enough points after end buffer filter: {bufferedPoints.Count}/{effectiveMinCount}");
                 return null;
             }
 
-            // Step 4: Select random points respecting spacing constraint (C1)
-            List<EnemySpawnData> selectedEnemies = SelectSpacedPoints(bufferedPoints);
+            // Step 4: Filter by wall proximity constraint (C5)
+            List<(Vector2 position, int segmentIndex)> wallFiltered = new List<(Vector2, int)>();
+            foreach (var point in bufferedPoints)
+            {
+                if (!IsNearWall(point.position, effectiveWallBuffer))
+                {
+                    wallFiltered.Add(point);
+                }
+            }
+
+            if (wallFiltered.Count < effectiveMinCount)
+            {
+                Debug.LogWarning($"[CSPValidator] Not enough points after wall buffer filter: {wallFiltered.Count}/{effectiveMinCount}");
+                return null;
+            }
+
+            // Step 5: Select random points respecting spacing constraint (C1)
+            List<EnemySpawnData> selectedEnemies = SelectSpacedPoints(wallFiltered, effectiveSpacing);
 
             lastValidPoints.Clear();
             foreach (var enemy in selectedEnemies)
@@ -104,10 +137,10 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 lastValidPoints.Add(enemy.Position);
             }
 
-            // Step 5: Validate minimum enemy count (C4)
-            if (selectedEnemies.Count < minEnemyCount)
+            // Step 6: Validate minimum enemy count (C4)
+            if (selectedEnemies.Count < effectiveMinCount)
             {
-                Debug.LogWarning($"[CSPValidator] Could not place enough enemies: {selectedEnemies.Count}/{minEnemyCount}");
+                Debug.LogWarning($"[CSPValidator] Could not place enough enemies: {selectedEnemies.Count}/{effectiveMinCount}");
                 return null;
             }
 
@@ -142,7 +175,7 @@ namespace DamnedVeil.ProceduralLogic.CSP
         /// <summary>
         /// Selects random points from the pool while respecting spacing constraints.
         /// </summary>
-        private List<EnemySpawnData> SelectSpacedPoints(List<(Vector2 position, int segmentIndex)> availablePoints)
+        private List<EnemySpawnData> SelectSpacedPoints(List<(Vector2 position, int segmentIndex)> availablePoints, float spacing)
         {
             List<EnemySpawnData> selected = new List<EnemySpawnData>();
 
@@ -159,7 +192,7 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 bool canPlace = true;
                 foreach (var existing in selected)
                 {
-                    if (Vector2.Distance(point.position, existing.Position) < minEnemySpacing)
+                    if (Vector2.Distance(point.position, existing.Position) < spacing)
                     {
                         canPlace = false;
                         break;
@@ -173,6 +206,25 @@ namespace DamnedVeil.ProceduralLogic.CSP
             }
 
             return selected;
+        }
+
+        /// <summary>
+        /// Checks if a position is too close to any wall collider.
+        /// Uses Physics2D.OverlapCircleAll and checks for the wall tag.
+        /// </summary>
+        private bool IsNearWall(Vector2 position, float bufferRadius)
+        {
+            if (bufferRadius <= 0f) return false;
+
+            Collider2D[] hits = Physics2D.OverlapCircleAll(position, bufferRadius);
+            foreach (var hit in hits)
+            {
+                if (hit.CompareTag(wallTag))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>

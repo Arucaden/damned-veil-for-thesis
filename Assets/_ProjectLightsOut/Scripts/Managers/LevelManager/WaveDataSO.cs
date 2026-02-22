@@ -17,10 +17,23 @@ namespace ProjectLightsOut.Managers
     [Serializable]
     public struct ProceduralWaveSettings
     {
+        [Header("Enemy Configuration")]
         public int EnemyCount;
         public List<GameObject> EnemyPool;
-        public float MinPathLength; // Optional override, defaults if 0
-        public int MaxBounces; // Optional override, defaults if 0
+
+        [Header("Path Settings (0 = use component default)")]
+        public float MinPathLength;
+        public int MaxBounces;
+
+        [Header("Constraint Settings (0 = use component default)")]
+        [Tooltip("Minimum distance from player. Enemies won't spawn inside this radius.")]
+        public float SafeZoneRadius;
+        [Tooltip("Minimum distance between enemies. Prevents clumping.")]
+        public float MinEnemySpacing;
+        [Tooltip("Don't spawn enemies near the end of the path.")]
+        public float EndPathBuffer;
+        [Tooltip("Minimum distance from walls. Enemies won't spawn within this radius of a wall.")]
+        public float WallBufferRadius;
     }
 
 

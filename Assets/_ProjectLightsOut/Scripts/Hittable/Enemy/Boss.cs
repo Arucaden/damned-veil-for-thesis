@@ -15,100 +15,99 @@ namespace ProjectLightsOut.Gameplay
         public int enemyCount;
     }
 
+    /// <summary>
+    /// Boss enemy — thin coordinator that delegates behavior to the current IBossPhase.
+    /// Phases: Idle → Phase1 → Stun → Phase2 → Dead.
+    /// </summary>
     public class Boss : Enemy
     {
+        // --- Serialized configuration ---
         [SerializeField] private List<WaveDataSO> firstPhaseWaves;
         [SerializeField] private List<WaveDataSO> secondPhaseWaves;
         [SerializeField] private ShieldEffect shieldEffect;
         [SerializeField] private List<Transform> teleportPoints;
-        private List<ActiveWaveData> activeWaves = new List<ActiveWaveData>();
-        public Action OnBossDamaged;
+        [SerializeField] private float maxSpawnCooldown = 4f;
+        [SerializeField] private float teleportCooldownMax = 5f;
+
+        // --- Public accessors for phases ---
+        public List<WaveDataSO> FirstPhaseWaves => firstPhaseWaves;
+        public List<WaveDataSO> SecondPhaseWaves => secondPhaseWaves;
+        public ShieldEffect ShieldEffect => shieldEffect;
+        public Animator Animator => animator;
         [HideInInspector] public int MaxHealth;
+        public Action OnBossDamaged;
+        public Action OnBossHealed;
+
+        // --- Wave tracking (shared across phases) ---
+        private List<ActiveWaveData> activeWaves = new List<ActiveWaveData>();
         private List<Enemy> activeEnemies = new List<Enemy>();
         private float spawnCooldown = 4f;
-        [SerializeField] private float maxSpawnCooldown = 4f;
-        private bool isBossReady = false;
         private bool isSpawnNeeded = false;
-        public Action OnBossHealed;
-        private bool isSecondPhase = false;
+
+        // --- Teleport state ---
         private float teleportCooldown = 5f;
-        private bool isShieldDisabled;
-        [SerializeField] private float teleportCooldownMax = 5f;
-        
+
+        // --- State machine ---
+        private IBossPhase currentPhase;
+
+        public void SetPhase(IBossPhase newPhase)
+        {
+            currentPhase?.Exit(this);
+            currentPhase = newPhase;
+            currentPhase.Enter(this);
+        }
+
+        // =================================================================
+        // Unity lifecycle
+        // =================================================================
+
         protected override void Start()
         {
             EventManager.Broadcast(new OnBossRegister(this));
             MaxHealth = health;
+            SetPhase(new BossIdlePhase());
         }
 
         private void Update()
         {
-            if (!IsHittable) return;
-
-            TrySpawnWave();
-
-            if (spawnCooldown > 0 && isSpawnNeeded)
-            {
-                spawnCooldown -= Time.deltaTime;
-            }
-
-            if (teleportCooldown > 0 && isSecondPhase)
-            {
-                teleportCooldown -= Time.deltaTime;
-            }
-
-            else if (teleportCooldown <= 0 && isSecondPhase)
-            {
-                StartCoroutine(Teleport(1f));
-            }
+            currentPhase?.UpdatePhase(this);
         }
 
         private void OnEnable()
         {
-            EventManager.AddListener<OnReadyBoss>(OnReadyBoss);
-            EventManager.AddListener<OnEnemyRegister>(OnEnemyRegister);
-            EventManager.AddListener<OnEnemyDead>(OnEnemyDead);
-            EventManager.AddListener<OnBossBuff>(OnBossBuff);
+            EventManager.AddListener<OnReadyBoss>(HandleReadyBoss);
+            EventManager.AddListener<OnEnemyRegister>(HandleEnemyRegister);
+            EventManager.AddListener<OnEnemyDead>(HandleEnemyDead);
+            EventManager.AddListener<OnBossBuff>(HandleBossBuff);
         }
 
         private void OnDisable()
         {
-            EventManager.RemoveListener<OnReadyBoss>(OnReadyBoss);
-            EventManager.RemoveListener<OnEnemyRegister>(OnEnemyRegister);
-            EventManager.RemoveListener<OnEnemyDead>(OnEnemyDead);
-            EventManager.RemoveListener<OnBossBuff>(OnBossBuff);
+            EventManager.RemoveListener<OnReadyBoss>(HandleReadyBoss);
+            EventManager.RemoveListener<OnEnemyRegister>(HandleEnemyRegister);
+            EventManager.RemoveListener<OnEnemyDead>(HandleEnemyDead);
+            EventManager.RemoveListener<OnBossBuff>(HandleBossBuff);
         }
 
-        private void OnBossBuff(OnBossBuff e)
+        // =================================================================
+        // Event handlers (delegate to current phase or manage shared state)
+        // =================================================================
+
+        private void HandleReadyBoss(OnReadyBoss e)
         {
-            if (e.buffType == BuffType.Health)
-            {
-                // if (health < MaxHealth)
-                // {
-                //     health += 1;
-                // }
-
-                OnBossHealed?.Invoke();
-            }
-
-            else if (e.buffType == BuffType.Shield)
-            {
-                if (isShieldDisabled) return;
-
-                shieldEffect.ChargeShield();
-            }
+            StartCoroutine(ReadyBossSequence());
         }
 
-        private void OnEnemyRegister(OnEnemyRegister e)
+        private void HandleEnemyRegister(OnEnemyRegister e)
         {
             activeEnemies.Add(e.Enemy);
         }
 
-        private void OnEnemyDead(OnEnemyDead e)
+        private void HandleEnemyDead(OnEnemyDead e)
         {
             activeEnemies.Remove(e.Enemy);
             ActiveWaveData activeWaveData = FindActiveWaveByEnemy(e.Enemy);
-            
+
             if (activeWaveData == null) return;
 
             activeWaveData.enemyCount--;
@@ -119,106 +118,41 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        private void OnReadyBoss(OnReadyBoss e)
+        private void HandleBossBuff(OnBossBuff e)
         {
-            StartCoroutine(ReadyBoss());
+            currentPhase?.OnBuff(this, e);
         }
+
+        // =================================================================
+        // OnHit override — delegates to current phase
+        // =================================================================
 
         public override void OnHit(int multiplier, Action OnTargetHit)
         {
-            if (!IsHittable) return;
+            currentPhase?.OnHit(this, multiplier, OnTargetHit);
+        }
 
+        // =================================================================
+        // Helper methods called by phase classes
+        // =================================================================
+
+        /// <summary>
+        /// Applies damage to the boss. Called by combat phases.
+        /// </summary>
+        public void ApplyDamage(int multiplier, Action OnTargetHit)
+        {
             health--;
             OnDamaged?.Invoke(multiplier);
             OnTargetHit?.Invoke();
             OnBossDamaged?.Invoke();
-
-            if (health <= MaxHealth / 2 && !isSecondPhase)
-            {
-                StartSecondPhase();
-            }
-
-            if (health <= 0)
-            {
-                IsHittable = false;
-                EventManager.Broadcast(new OnTriggerLevelComplete());
-                EventManager.Broadcast(new OnBossDead());
-
-                EventManager.Broadcast(new OnPlaySFX("Bell"));
-                StartCoroutine(LastZoom());
-                EventManager.Broadcast(new OnSlowTime(0.1f, 1.2f));
-                animator.SetTrigger("stun");
-            }
         }
 
-        private void StartSecondPhase()
+        /// <summary>
+        /// Attempts to spawn a new wave from the given source list.
+        /// Called by Phase1 (firstPhaseWaves) and Phase2 (secondPhaseWaves).
+        /// </summary>
+        public void TrySpawnWave(List<WaveDataSO> sourceWaves)
         {
-            isSecondPhase = true;
-            StartCoroutine(Stun(6f));
-        }
-
-        private IEnumerator Stun(float duration)
-        {
-            isShieldDisabled = true;
-            animator.SetTrigger("stun");
-            EventManager.Broadcast(new OnPlaySFX("Stun"));
-            shieldEffect.DeactivateShield();
-            EventManager.Broadcast(new OnSpotting(transform, 0.2f));
-            EventManager.Broadcast(new OnZoom(-0.7f, 0.2f));
-            EventManager.Broadcast(new OnSlowTime(0.1f, 1.2f));
-            yield return new WaitForSeconds(0.5f);
-            EventManager.Broadcast(new OnSpottingEnd(0.4f));
-            EventManager.Broadcast(new OnZoomEnd(0.4f));
-            yield return new WaitForSeconds(duration);
-            animator.SetTrigger("wake");
-            yield return new WaitForSeconds(0.6f);
-            StartCoroutine(Teleport(1f));
-            isShieldDisabled = false;
-        }
-
-        private IEnumerator Teleport(float delay)
-        {
-            isShieldDisabled = true;
-            IsHittable = false;
-            animator.SetTrigger("teleport");
-            shieldEffect.DeactivateShield();
-            int random = UnityEngine.Random.Range(0, teleportPoints.Count - 1);
-            Instantiate(SpawnEffect, teleportPoints[random].position, Quaternion.identity);
-            yield return new WaitForSeconds(delay);
-            transform.position = teleportPoints[random].position;
-            isShieldDisabled = false;
-            teleportCooldown = teleportCooldownMax + UnityEngine.Random.Range(0, 3);
-            IsHittable = true;
-        }
-
-        private IEnumerator LastZoom()
-        {
-            EventManager.Broadcast(new OnSpotting(transform, 0.2f));
-            EventManager.Broadcast(new OnZoom(-0.5f, 0.2f));
-
-            yield return new WaitForSecondsRealtime(1.2f);
-
-            EventManager.Broadcast(new OnSpottingEnd(0.4f));
-            EventManager.Broadcast(new OnZoomEnd(0.4f));
-        }
-
-        private ActiveWaveData FindActiveWaveByEnemy(Enemy enemy)
-        {
-            foreach (ActiveWaveData activeWaveData in activeWaves)
-            {
-                if (activeWaveData.waveData == enemy.WaveData)
-                {
-                    return activeWaveData;
-                }
-            }
-
-            return null;
-        }
-
-        private void TrySpawnWave()
-        {
-            if (!isBossReady) return;
-            
             if (activeWaves.Count <= 1)
             {
                 isSpawnNeeded = true;
@@ -226,14 +160,11 @@ namespace ProjectLightsOut.Gameplay
 
             if (spawnCooldown <= 0)
             {
-                // Use the correct wave list based on current phase
-                List<WaveDataSO> sourceWaves = isSecondPhase ? secondPhaseWaves : firstPhaseWaves;
                 List<WaveDataSO> waveCache = new List<WaveDataSO>(sourceWaves);
                 waveCache.RemoveAll(x => activeWaves.Exists(y => y.waveData == x));
 
                 if (waveCache.Count == 0)
                 {
-                    // All waves are active — fallback to full list
                     waveCache = new List<WaveDataSO>(sourceWaves);
                 }
 
@@ -246,10 +177,64 @@ namespace ProjectLightsOut.Gameplay
                 isSpawnNeeded = false;
                 spawnCooldown = maxSpawnCooldown;
             }
-
         }
 
-        private IEnumerator ReadyBoss()
+        /// <summary>
+        /// Ticks the spawn cooldown timer. Called each frame by active combat phases.
+        /// </summary>
+        public void TickSpawnCooldown()
+        {
+            if (spawnCooldown > 0 && isSpawnNeeded)
+            {
+                spawnCooldown -= Time.deltaTime;
+            }
+        }
+
+        /// <summary>
+        /// Ticks the teleport cooldown and triggers teleport when ready.
+        /// Called each frame by Phase2.
+        /// </summary>
+        public void TickTeleportCooldown()
+        {
+            if (teleportCooldown > 0)
+            {
+                teleportCooldown -= Time.deltaTime;
+            }
+            else
+            {
+                StartCoroutine(Teleport(1f));
+            }
+        }
+
+        /// <summary>
+        /// Teleports the boss to a random teleport point.
+        /// </summary>
+        public IEnumerator Teleport(float delay)
+        {
+            IsHittable = false;
+            animator.SetTrigger("teleport");
+            shieldEffect.DeactivateShield();
+            int random = UnityEngine.Random.Range(0, teleportPoints.Count - 1);
+            if (spawnEffectPool != null)
+            {
+                GameObject fx = spawnEffectPool.Get(teleportPoints[random].position, Quaternion.identity);
+                spawnEffectPool.Return(fx, 1f);
+            }
+            else
+            {
+                Instantiate(SpawnEffect, teleportPoints[random].position, Quaternion.identity);
+            }
+            yield return new WaitForSeconds(delay);
+            transform.position = teleportPoints[random].position;
+            teleportCooldown = teleportCooldownMax + UnityEngine.Random.Range(0, 3);
+            IsHittable = true;
+        }
+
+        // =================================================================
+        // Intro sequence (transitions from Idle → Phase1)
+        // =================================================================
+
+        private IEnumerator ReadyBossSequence()
         {
             EventManager.Broadcast(new OnSpotting(transform, 2f));
 
@@ -272,7 +257,23 @@ namespace ProjectLightsOut.Gameplay
 
             EventManager.Broadcast(new OnPlayerEnableShooting(true));
 
-            isBossReady = true;
+            SetPhase(new BossPhase1());
+        }
+
+        // =================================================================
+        // Internal helpers
+        // =================================================================
+
+        private ActiveWaveData FindActiveWaveByEnemy(Enemy enemy)
+        {
+            foreach (ActiveWaveData data in activeWaves)
+            {
+                if (data.waveData == enemy.WaveData)
+                {
+                    return data;
+                }
+            }
+            return null;
         }
     }
 }

@@ -8,7 +8,7 @@ namespace ProjectLightsOut.Gameplay
 {
     public class Enemy : MonoBehaviour, IHittable
     {
-        public bool IsHittable { get; protected set; } = true;
+        public bool IsHittable { get; set; } = true;
         public string EnemyIdentifier { get; set; }
         public WaveDataSO WaveData { get; set; }
         [SerializeField] protected int health = 1;
@@ -22,6 +22,8 @@ namespace ProjectLightsOut.Gameplay
         [SerializeField] protected SpriteRenderer spriteRenderer;
         [SerializeField] protected SpriteRenderer shadowRenderer;
         [SerializeField] protected GameObject killEffect;
+        [SerializeField] protected SimplePool spawnEffectPool;
+        [SerializeField] protected SimplePool killEffectPool;
         protected Action OnSpawned;
 
         protected virtual void Awake()
@@ -63,7 +65,15 @@ namespace ProjectLightsOut.Gameplay
                 EventManager.Broadcast(new OnEnemyDead(this));
                 EventManager.Broadcast(new OnAddScore(score * multiplier));
                 EventManager.Broadcast(new OnPlaySFX("Kill"));
-                Instantiate(killEffect, transform.position, Quaternion.identity);
+                if (killEffectPool != null)
+                {
+                    GameObject fx = killEffectPool.Get(transform.position, Quaternion.identity);
+                    killEffectPool.Return(fx, 1f);
+                }
+                else
+                {
+                    Instantiate(killEffect, transform.position, Quaternion.identity);
+                }
                 StartCoroutine(DeadDelay());
             }
         }
@@ -83,7 +93,15 @@ namespace ProjectLightsOut.Gameplay
 
             if (SpawnEffect != null)
             {
-                Instantiate(SpawnEffect, transform.position - new Vector3(0, 0.1f, 1), Quaternion.identity);
+                if (spawnEffectPool != null)
+                {
+                    GameObject fx = spawnEffectPool.Get(transform.position - new Vector3(0, 0.1f, 1), Quaternion.identity);
+                    spawnEffectPool.Return(fx, 1f);
+                }
+                else
+                {
+                    Instantiate(SpawnEffect, transform.position - new Vector3(0, 0.1f, 1), Quaternion.identity);
+                }
             }
 
             StartCoroutine(SpawnDelay());

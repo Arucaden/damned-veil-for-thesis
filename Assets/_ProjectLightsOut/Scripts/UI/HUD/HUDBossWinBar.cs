@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using ProjectLightsOut.DevUtils;
+using ProjectLightsOut.Gameplay;
 using ProjectLightsOut.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HUDBossWinBar : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class HUDBossWinBar : MonoBehaviour
+    {
     [SerializeField] private Image chantBar;
     [SerializeField] private RectTransform rectTransform;
     [SerializeField] private Vector2 retractPosition;
@@ -152,5 +155,6 @@ public class HUDBossWinBar : MonoBehaviour
         }
 
         canvasGroup.alpha = 1;
+    }
     }
 }

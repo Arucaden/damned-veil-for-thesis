@@ -3,8 +3,10 @@ using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Managers;
 using UnityEngine;
 
-public class MainMenuUIManager : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class MainMenuUIManager : MonoBehaviour
+    {
     [SerializeField] private CanvasGroup canvasGroup;
     private bool isPressed = false;
 
@@ -46,5 +48,6 @@ public class MainMenuUIManager : MonoBehaviour
         }
 
         canvasGroup.alpha = 0f;
+    }
     }
 }

@@ -4,8 +4,10 @@ using ProjectLightsOut.Managers;
 using TMPro;
 using UnityEngine;
 
-public class GameOverUI : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class GameOverUI : MonoBehaviour
+    {
     [SerializeField] private CanvasGroup canvasGroup;
     [SerializeField] private TextMeshProUGUI gameOverText;
     [SerializeField] private TextMeshProUGUI playtext;
@@ -96,5 +98,6 @@ public class GameOverUI : MonoBehaviour
 
         gameOverText.alpha = 1;
         gameOverText.rectTransform.anchoredPosition = gameOverTextOriginalPosition;
+    }
     }
 }

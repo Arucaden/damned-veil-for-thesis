@@ -6,8 +6,10 @@ using ProjectLightsOut.Managers;
 using TMPro;
 using UnityEngine;
 
-public class HUDReloadUI : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class HUDReloadUI : MonoBehaviour
+    {
     private int bullets;
     private int currentBullets;
     private bool reloading;
@@ -51,5 +53,6 @@ public class HUDReloadUI : MonoBehaviour
         }
 
         reloadText.alpha = 0.2f + Mathf.PingPong(Time.time, 0.4f);
+    }
     }
 }

@@ -3,8 +3,10 @@ using UnityEngine;
 using ProjectLightsOut.Managers;
 using System.Collections;
 
-public class HUDBulletUI : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class HUDBulletUI : MonoBehaviour
+    {
     [SerializeField] private Transform bulletParent;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Vector2 retractPosition;
@@ -93,5 +95,6 @@ public class HUDBulletUI : MonoBehaviour
         }
 
         canvasGroup.alpha = 1;
+    }
     }
 }

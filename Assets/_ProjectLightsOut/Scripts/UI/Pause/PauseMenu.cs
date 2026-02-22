@@ -2,8 +2,10 @@ using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Managers;
 using UnityEngine;
 
-public class PauseMenu : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class PauseMenu : MonoBehaviour
+    {
 
     [SerializeField]
     GameObject _pauseUI;
@@ -45,5 +47,6 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         _pauseUI.SetActive(false);
         GameManager.Instance.QuitToMainMenu();
+    }
     }
 }

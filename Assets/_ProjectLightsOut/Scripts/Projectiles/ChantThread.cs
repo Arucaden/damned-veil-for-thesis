@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using ProjectLightsOut.DevUtils;
 using UnityEngine;
 
-public class ChantThread : BossBuffThread
+namespace ProjectLightsOut.Gameplay
 {
-    protected override void Arrived()
+    public class ChantThread : BossBuffThread
     {
-        EventManager.Broadcast(new OnEnemyChant());
-        Destroy(gameObject);
+        protected override void Arrived()
+        {
+            EventManager.Broadcast(new OnEnemyChant());
+            Destroy(gameObject);
+        }
     }
 }

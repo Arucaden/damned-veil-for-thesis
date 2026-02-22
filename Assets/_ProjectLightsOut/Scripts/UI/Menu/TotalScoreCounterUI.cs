@@ -7,8 +7,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TotalScoreCounterUI : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class TotalScoreCounterUI : MonoBehaviour
+    {
     [SerializeField] private TextMeshProUGUI totalScoreText;
     [SerializeField] private TextMeshProUGUI bonusText;
     [SerializeField] private CanvasGroup canvasGroup;
@@ -235,4 +237,5 @@ public class TotalScoreCounterUI : MonoBehaviour
                 yield return new WaitForSeconds(0.1f);
             }
         }
+    }
 }

@@ -5,82 +5,85 @@ using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Managers;
 using UnityEngine;
 
-public class FadeBlackUI : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
-    [SerializeField] private CanvasGroup canvasGroup;
-    [SerializeField] private bool FadeInOnStart = false;
-    private Action OnFadeBlackComplete;
-
-    private void Awake()
+    public class FadeBlackUI : MonoBehaviour
     {
-        if (FadeInOnStart)
+        [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private bool FadeInOnStart = false;
+        private Action OnFadeBlackComplete;
+
+        private void Awake()
         {
-            canvasGroup.alpha = 1;
+            if (FadeInOnStart)
+            {
+                canvasGroup.alpha = 1;
+                canvasGroup.interactable = true;
+                canvasGroup.blocksRaycasts = true;
+
+                StartCoroutine(FadeIn(1f, 2f));
+            }
+
+            else
+            {
+                canvasGroup.alpha = 0;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+            }
+        }
+
+        private void OnEnable()
+        {
+            EventManager.AddListener<OnChangeScene>(OnChangeScene);
+            EventManager.AddListener<OnFadeBlack>(OnFadeBlack);
+        }
+
+        private void OnDisable()
+        {
+            EventManager.RemoveListener<OnChangeScene>(OnChangeScene);
+            EventManager.RemoveListener<OnFadeBlack>(OnFadeBlack);
+        }
+
+        private void OnFadeBlack(OnFadeBlack e)
+        {
+            StartCoroutine(FadeBlack(1f));
+        }
+
+        private void OnChangeScene(OnChangeScene e)
+        {
+        }
+
+        private IEnumerator FadeIn(float delay, float duration)
+        {
+            yield return new WaitForSeconds(delay);
+            
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+
+            float timeElapsed = 0f;
+            while (timeElapsed < duration)
+            {
+                timeElapsed += Time.deltaTime;
+                canvasGroup.alpha = 1 - timeElapsed / duration;
+                yield return null;
+            }
+            canvasGroup.alpha = 0;
+        }
+
+        private IEnumerator FadeBlack(float duration)
+        {
             canvasGroup.interactable = true;
             canvasGroup.blocksRaycasts = true;
 
-            StartCoroutine(FadeIn(1f, 2f));
+            float timeElapsed = 0f;
+            while (timeElapsed < duration)
+            {
+                timeElapsed += Time.deltaTime;
+                canvasGroup.alpha = timeElapsed / duration;
+                yield return null;
+            }
+            canvasGroup.alpha = 1;
+            OnFadeBlackComplete?.Invoke();
         }
-
-        else
-        {
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
-        }
-    }
-
-    private void OnEnable()
-    {
-        EventManager.AddListener<OnChangeScene>(OnChangeScene);
-        EventManager.AddListener<OnFadeBlack>(OnFadeBlack);
-    }
-
-    private void OnDisable()
-    {
-        EventManager.RemoveListener<OnChangeScene>(OnChangeScene);
-        EventManager.RemoveListener<OnFadeBlack>(OnFadeBlack);
-    }
-
-    private void OnFadeBlack(OnFadeBlack e)
-    {
-        StartCoroutine(FadeBlack(1f));
-    }
-
-    private void OnChangeScene(OnChangeScene e)
-    {
-    }
-
-    private IEnumerator FadeIn(float delay, float duration)
-    {
-        yield return new WaitForSeconds(delay);
-        
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
-
-        float timeElapsed = 0f;
-        while (timeElapsed < duration)
-        {
-            timeElapsed += Time.deltaTime;
-            canvasGroup.alpha = 1 - timeElapsed / duration;
-            yield return null;
-        }
-        canvasGroup.alpha = 0;
-    }
-
-    private IEnumerator FadeBlack(float duration)
-    {
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
-
-        float timeElapsed = 0f;
-        while (timeElapsed < duration)
-        {
-            timeElapsed += Time.deltaTime;
-            canvasGroup.alpha = timeElapsed / duration;
-            yield return null;
-        }
-        canvasGroup.alpha = 1;
-        OnFadeBlackComplete?.Invoke();
     }
 }

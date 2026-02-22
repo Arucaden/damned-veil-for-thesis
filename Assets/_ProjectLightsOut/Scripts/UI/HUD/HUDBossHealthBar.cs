@@ -6,8 +6,10 @@ using ProjectLightsOut.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HUDBossHealthBar : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class HUDBossHealthBar : MonoBehaviour
+    {
     [SerializeField] private Image healthBar;
     [SerializeField] private RectTransform rectTransform;
     [SerializeField] private Vector2 retractPosition;
@@ -191,5 +193,6 @@ public class HUDBossHealthBar : MonoBehaviour
         }
 
         healthBar.rectTransform.sizeDelta = new Vector2(fullHealth, healthBar.rectTransform.sizeDelta.y);
+    }
     }
 }

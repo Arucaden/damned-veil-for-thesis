@@ -6,8 +6,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-public class TitleUI : MonoBehaviour
+namespace ProjectLightsOut.UI
 {
+    public class TitleUI : MonoBehaviour
+    {
     [SerializeField] private Vector2 zoomedPosition;
     private Vector2 originalPosition;
     [SerializeField] private float zoomScale = 1.5f;
@@ -143,5 +145,6 @@ public class TitleUI : MonoBehaviour
 
             yield return new WaitForSeconds(0.1f);
         }
+    }
     }
 }

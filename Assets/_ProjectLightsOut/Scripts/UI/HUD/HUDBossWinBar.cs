@@ -54,14 +54,12 @@ public class HUDBossWinBar : MonoBehaviour
     {
         EventManager.AddListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
         EventManager.AddListener<OnEnemyChant>(OnEnemyChant);
-        EventManager.AddListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
     }
 
     private void OnDisable()
     {
         EventManager.RemoveListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
         EventManager.RemoveListener<OnEnemyChant>(OnEnemyChant);
-        EventManager.RemoveListener<OnPlayerEnableShooting>(OnPlayerEnableShooting);
     }
 
     private void OnPlayerEnableShooting(OnPlayerEnableShooting e)

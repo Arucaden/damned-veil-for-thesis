@@ -24,18 +24,25 @@ namespace ProjectLightsOut.Effects
             }
         }
 
+        [SerializeField] private float trailLifetime = 0.3f;
+
         private void CreateTrailEffect()
         {
-            GameObject trailEffect = Instantiate(new GameObject(), transform.position, Quaternion.identity);
-            GameObject trailEffectSprite = Instantiate(new GameObject(), trailEffect.transform.position, Quaternion.identity);
-            trailEffectSprite.transform.SetParent(trailEffect.transform);
+            GameObject trailEffect = new GameObject("TrailAfterImage");
+            trailEffect.transform.position = transform.position;
             trailEffect.transform.localScale = projectilePrefab.transform.localScale;
+
+            GameObject trailEffectSprite = new GameObject("Sprite");
+            trailEffectSprite.transform.SetParent(trailEffect.transform);
+            trailEffectSprite.transform.localPosition = Vector3.zero;
             trailEffectSprite.transform.localScale = projectileSpriteRenderer.transform.localScale;
 
             SpriteRenderer trailEffectSpriteRenderer = trailEffectSprite.AddComponent<SpriteRenderer>();
             trailEffectSpriteRenderer.sortingLayerName = projectileSpriteRenderer.sortingLayerName;
             trailEffectSpriteRenderer.sprite = projectileSpriteRenderer.sprite;
             trailEffectSpriteRenderer.color = new Color(trailEffectSpriteRenderer.color.r, trailEffectSpriteRenderer.color.g, trailEffectSpriteRenderer.color.b, 0.25f);
+
+            Destroy(trailEffect, trailLifetime);
         }
     }
 }

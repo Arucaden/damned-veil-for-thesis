@@ -98,7 +98,7 @@ namespace ProjectLightsOut.UI
 
             while (time < duration)
             {
-                time += Time.deltaTime;
+                time += Time.unscaledDeltaTime;
                 rectTransform.anchoredPosition = Vector2.Lerp(currentPos, retractPosition, time / duration);
                 canvasGroup.alpha = Mathf.Lerp(1, 0f, time / duration);
                 yield return null;
@@ -116,7 +116,7 @@ namespace ProjectLightsOut.UI
 
             while (time < duration)
             {
-                time += Time.deltaTime;
+                time += Time.unscaledDeltaTime;
                 rectTransform.anchoredPosition = Vector2.Lerp(currentPos, originalPosition, time / duration);
                 canvasGroup.alpha = Mathf.Lerp(0, 1f, time / duration);
                 yield return null;

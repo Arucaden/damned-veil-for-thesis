@@ -54,7 +54,7 @@ public class GameOverUI : MonoBehaviour
         canvasGroup.blocksRaycasts = true;
     }
 
-    public async void OnRetryButtonClicked()
+    public void OnRetryButtonClicked()
     {
         if (isPressed) return;
 
@@ -66,7 +66,7 @@ public class GameOverUI : MonoBehaviour
         AppStateManager.Instance.RestartGameplay(LevelManager.Instance.LevelName);
     }
 
-    public async void OnTitleScreenButtonClicked()
+    public void OnTitleScreenButtonClicked()
     {
         if (isPressed) return;
 

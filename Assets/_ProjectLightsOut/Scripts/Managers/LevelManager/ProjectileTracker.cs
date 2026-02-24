@@ -15,6 +15,9 @@ namespace ProjectLightsOut.Managers
         private bool isLevelComplete = false;
         private bool isGameOver = false;
 
+        [SerializeField] private WaveManager waveManager;
+        [SerializeField] private LevelFlowController flowController;
+
         private void OnEnable()
         {
             EventManager.AddListener<OnProjectileShoot>(OnProjectileShoot);
@@ -54,23 +57,15 @@ namespace ProjectLightsOut.Managers
                 StartCoroutine(LevelComplete());
             }
 
-            if (activeProjectiles == 0 && GetWaveManager().Enemies.Count > 0 && bulletRemaining <= 0)
+            if (activeProjectiles == 0 && waveManager != null && waveManager.Enemies.Count > 0 && bulletRemaining <= 0)
             {
-                if (LevelManager.LevelData.IsBossLevel)
-                {
-                    // Boss levels don't game-over on empty bullets
-                }
-                else
+                if (!LevelManager.LevelData.IsBossLevel)
                 {
                     StartCoroutine(GameOver());
                 }
             }
         }
 
-        private WaveManager GetWaveManager()
-        {
-            return GetComponent<WaveManager>();
-        }
 
         private IEnumerator GameOver()
         {
@@ -91,7 +86,7 @@ namespace ProjectLightsOut.Managers
 
             yield return new WaitForSeconds(2f);
 
-            var flowController = GetComponent<LevelFlowController>();
+            if (flowController == null) yield break;
             EventManager.Broadcast(new OnPlayerMove(true, flowController.EndWaypoints));
 
             float timeElapsed = flowController.TimeElapsed;

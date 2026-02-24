@@ -227,10 +227,10 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
         private void OnDrawGizmosSelected()
         {
             // Draw safe zone around player
-            if (playerTransform != null && cspValidator != null)
+            if (playerTransform != null && lastSettings.SafeZoneRadius > 0f)
             {
                 Gizmos.color = new Color(1f, 0f, 0f, 0.2f);
-                Gizmos.DrawWireSphere(playerTransform.position, cspValidator.SafeZoneRadius);
+                Gizmos.DrawWireSphere(playerTransform.position, lastSettings.SafeZoneRadius);
             }
         }
 #endif

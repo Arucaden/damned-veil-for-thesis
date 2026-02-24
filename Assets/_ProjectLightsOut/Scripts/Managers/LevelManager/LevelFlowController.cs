@@ -18,6 +18,8 @@ namespace ProjectLightsOut.Managers
 
         public List<Transform> EndWaypoints => endWaypoints;
 
+        [SerializeField] private WaveManager waveManager;
+
         private float timeElapsed = 0f;
         public float TimeElapsed => timeElapsed;
 
@@ -107,7 +109,7 @@ namespace ProjectLightsOut.Managers
             EventManager.Broadcast(new OnPlayerEnableShooting(true));
 
             // Trigger initial wave check (spawns first wave if no pre-placed enemies)
-            GetComponent<WaveManager>().TriggerInitialWaveCheck();
+            waveManager?.TriggerInitialWaveCheck();
         }
 
         private void OnCompleteCountingScore(OnCompleteCountingScore evt)

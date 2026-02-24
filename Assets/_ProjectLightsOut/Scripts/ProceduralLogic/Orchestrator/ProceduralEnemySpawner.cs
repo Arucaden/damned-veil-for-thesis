@@ -23,6 +23,7 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
         [SerializeField] private Transform playerTransform;
         [SerializeField] private int maxAttempts = 100;
         [SerializeField] private float minPathLength = 5f;
+        [SerializeField] private Projectile bulletPrefab;
 
         [Header("Visualization")]
         [SerializeField] private LineRenderer pathLineRenderer;
@@ -52,6 +53,12 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             // Use local overrides if provided, don't mutate inspector defaults
             float effectiveMinPathLength = settings.MinPathLength > 0 ? settings.MinPathLength : minPathLength;
             int effectiveMaxBounces = settings.MaxBounces > 0 ? settings.MaxBounces : -1;
+
+            // Safety: clamp path bounces to bullet's ricochet limit to prevent unsolvable levels
+            if (bulletPrefab != null && effectiveMaxBounces > 0)
+            {
+                effectiveMaxBounces = Mathf.Min(effectiveMaxBounces, bulletPrefab.MaxRicochetCount);
+            }
             lastSettings = settings; // Cache for Respawn
             
             ClearSpawnedEnemies();

@@ -12,14 +12,12 @@ namespace ProjectLightsOut.Gameplay
         private int ricochetCount;
         private float destroyTimer = 10f;
         [SerializeField] private int maxRicochetCount = 3;
+        public int MaxRicochetCount => maxRicochetCount;
         [SerializeField] private SimplePool impactPool;
         [SerializeField] private SimplePool hitPool;
         private Action OnTargetHit;
         private int targetHit;
 
-        /// <summary>
-        /// Set by PlayerShoot so the projectile can return itself to the pool.
-        /// </summary>
         [HideInInspector] public SimplePool ParentPool;
 
         private void Awake()
@@ -123,9 +121,6 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        /// <summary>
-        /// Resets all runtime state so the pooled object can be reused cleanly.
-        /// </summary>
         public void ResetProjectile()
         {
             ricochetCount = 0;

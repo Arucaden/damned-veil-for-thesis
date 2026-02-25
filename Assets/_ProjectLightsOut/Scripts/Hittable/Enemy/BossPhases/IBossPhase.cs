@@ -3,15 +3,14 @@ using System;
 namespace ProjectLightsOut.Gameplay
 {
     /// <summary>
-    /// State interface for the Boss state machine.
-    /// Each phase implements its own Update, OnHit, and OnBuff behavior.
+    /// Generic state interface for all boss state machines.
+    /// T is the specific boss type, enabling type-safe phase implementations.
     /// </summary>
-    public interface IBossPhase
+    public interface IBossPhase<T> where T : BossBase<T>
     {
-        void Enter(Boss boss);
-        void UpdatePhase(Boss boss);
-        void OnHit(Boss boss, int multiplier, Action OnTargetHit);
-        void OnBuff(Boss boss, OnBossBuff e);
-        void Exit(Boss boss);
+        void Enter(T boss);
+        void UpdatePhase(T boss);
+        void OnHit(T boss, int multiplier, Action OnTargetHit);
+        void Exit(T boss);
     }
 }

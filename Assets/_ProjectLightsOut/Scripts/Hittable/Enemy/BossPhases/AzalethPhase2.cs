@@ -6,35 +6,34 @@ using UnityEngine;
 namespace ProjectLightsOut.Gameplay
 {
     /// <summary>
-    /// Second combat phase. Boss spawns waves from secondPhaseWaves,
-    /// is hittable, teleports periodically, and accepts buffs.
-    /// Transitions to Dead at 0 health.
+    /// Phase 2 — Azaleth spawns second phase waves, teleports periodically,
+    /// and is more aggressive. Transitions to Dead at 0 health.
     /// </summary>
-    public class BossPhase2 : IBossPhase
+    public class AzalethPhase2 : IBossPhase<AzalethBoss>, IAzalethPhase
     {
-        public void Enter(Boss boss)
+        public void Enter(AzalethBoss boss)
         {
             boss.IsHittable = true;
         }
 
-        public void UpdatePhase(Boss boss)
+        public void UpdatePhase(AzalethBoss boss)
         {
             boss.TrySpawnWave(boss.SecondPhaseWaves);
             boss.TickSpawnCooldown();
             boss.TickTeleportCooldown();
         }
 
-        public void OnHit(Boss boss, int multiplier, Action OnTargetHit)
+        public void OnHit(AzalethBoss boss, int multiplier, Action OnTargetHit)
         {
             boss.ApplyDamage(multiplier, OnTargetHit);
 
             if (boss.Health <= 0)
             {
-                boss.SetPhase(new BossDeadPhase());
+                boss.SetPhase(new AzalethDeadPhase());
             }
         }
 
-        public void OnBuff(Boss boss, OnBossBuff e)
+        public void OnBuff(AzalethBoss boss, OnBossBuff e)
         {
             if (e.buffType == BuffType.Health)
             {
@@ -46,6 +45,6 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        public void Exit(Boss boss) { }
+        public void Exit(AzalethBoss boss) { }
     }
 }

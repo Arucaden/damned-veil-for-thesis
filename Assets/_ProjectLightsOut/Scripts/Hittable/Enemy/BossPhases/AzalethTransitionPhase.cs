@@ -7,22 +7,22 @@ using UnityEngine;
 namespace ProjectLightsOut.Gameplay
 {
     /// <summary>
-    /// Stun transition phase. Boss is stunned with camera effects,
-    /// shield disabled. After duration, wakes up and transitions to Phase2.
+    /// Transition phase — Azaleth is stunned. Camera effects, shield disabled.
+    /// After the stun duration, wakes up and enters Phase 2.
     /// </summary>
-    public class BossStunPhase : IBossPhase
+    public class AzalethTransitionPhase : IBossPhase<AzalethBoss>, IAzalethPhase
     {
-        public void Enter(Boss boss)
+        public void Enter(AzalethBoss boss)
         {
             boss.IsHittable = false;
             boss.StartCoroutine(StunSequence(boss));
         }
 
-        public void UpdatePhase(Boss boss) { }
+        public void UpdatePhase(AzalethBoss boss) { }
 
-        public void OnHit(Boss boss, int multiplier, Action OnTargetHit) { }
+        public void OnHit(AzalethBoss boss, int multiplier, Action OnTargetHit) { }
 
-        public void OnBuff(Boss boss, OnBossBuff e)
+        public void OnBuff(AzalethBoss boss, OnBossBuff e)
         {
             // Shield buffs blocked during stun
             if (e.buffType == BuffType.Health)
@@ -31,11 +31,11 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        public void Exit(Boss boss) { }
+        public void Exit(AzalethBoss boss) { }
 
-        private IEnumerator StunSequence(Boss boss)
+        private IEnumerator StunSequence(AzalethBoss boss)
         {
-            boss.Animator.SetTrigger("stun");
+            boss.BossAnimator.SetTrigger("stun");
             EventManager.Broadcast(new OnPlaySFX("Stun"));
             boss.ShieldEffect.DeactivateShield();
             EventManager.Broadcast(new OnSpotting(boss.transform, 0.2f));
@@ -47,11 +47,11 @@ namespace ProjectLightsOut.Gameplay
             EventManager.Broadcast(new OnZoomEnd(0.4f));
 
             yield return new WaitForSeconds(6f);
-            boss.Animator.SetTrigger("wake");
+            boss.BossAnimator.SetTrigger("wake");
 
             yield return new WaitForSeconds(0.6f);
 
-            boss.SetPhase(new BossPhase2());
+            boss.SetPhase(new AzalethPhase2());
 
             // Teleport immediately after entering Phase2
             boss.StartCoroutine(boss.Teleport(1f));

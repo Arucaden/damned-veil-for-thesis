@@ -7,40 +7,39 @@ using UnityEngine;
 namespace ProjectLightsOut.Gameplay
 {
     /// <summary>
-    /// First combat phase. Boss spawns waves from firstPhaseWaves,
-    /// is hittable, and accepts shield/health buffs.
-    /// Transitions to Stun at half health, or Dead at 0.
+    /// Phase 1 — Azaleth spawns waves from firstPhaseWaves, is hittable,
+    /// and accepts shield/health buffs. Transitions to Transition (stun) at half health.
     /// </summary>
-    public class BossPhase1 : IBossPhase
+    public class AzalethPhase1 : IBossPhase<AzalethBoss>, IAzalethPhase
     {
-        public void Enter(Boss boss)
+        public void Enter(AzalethBoss boss)
         {
             boss.IsHittable = true;
         }
 
-        public void UpdatePhase(Boss boss)
+        public void UpdatePhase(AzalethBoss boss)
         {
             boss.TrySpawnWave(boss.FirstPhaseWaves);
             boss.TickSpawnCooldown();
         }
 
-        public void OnHit(Boss boss, int multiplier, Action OnTargetHit)
+        public void OnHit(AzalethBoss boss, int multiplier, Action OnTargetHit)
         {
             boss.ApplyDamage(multiplier, OnTargetHit);
 
-            if (boss.Health <= boss.MaxHealth / 2)
+            if (boss.Health <= 0)
             {
-                boss.SetPhase(new BossStunPhase());
+                boss.SetPhase(new AzalethDeadPhase());
                 return;
             }
 
-            if (boss.Health <= 0)
+            if (boss.Health <= boss.MaxHealth / 2)
             {
-                boss.SetPhase(new BossDeadPhase());
+                boss.SetPhase(new AzalethTransitionPhase());
             }
         }
 
-        public void OnBuff(Boss boss, OnBossBuff e)
+        public void OnBuff(AzalethBoss boss, OnBossBuff e)
         {
             if (e.buffType == BuffType.Health)
             {
@@ -52,6 +51,6 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        public void Exit(Boss boss) { }
+        public void Exit(AzalethBoss boss) { }
     }
 }

@@ -17,9 +17,9 @@ namespace ProjectLightsOut.Managers
 
     public class OnBossRegister : GameEvent
     {
-        public Boss Boss;
+        public Enemy Boss;
 
-        public OnBossRegister(Boss boss)
+        public OnBossRegister(Enemy boss)
         {
             Boss = boss;
         }
@@ -120,9 +120,9 @@ namespace ProjectLightsOut.Managers
 
     public class OnBossReady : GameEvent
     {
-        public Boss Boss;
+        public Enemy Boss;
 
-        public OnBossReady(Boss boss)
+        public OnBossReady(Enemy boss)
         {
             Boss = boss;
         }

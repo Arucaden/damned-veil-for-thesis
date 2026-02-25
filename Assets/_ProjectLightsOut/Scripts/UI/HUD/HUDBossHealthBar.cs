@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Gameplay;
 using ProjectLightsOut.Managers;
@@ -8,6 +7,10 @@ using UnityEngine.UI;
 
 namespace ProjectLightsOut.UI
 {
+    /// <summary>
+    /// Boss health bar UI. Works with any boss via the IBoss interface.
+    /// Subscribes to OnBossDamaged/OnBossHealed for health changes.
+    /// </summary>
     public class HUDBossHealthBar : MonoBehaviour
     {
     [SerializeField] private Image healthBar;
@@ -18,7 +21,7 @@ namespace ProjectLightsOut.UI
     private float fullHealth;
     private Vector2 originalScale;
     private Color originalColor;
-    private Boss boss;
+    private IBoss boss;
     private Coroutine healthColorCoroutine;
 
     private void Awake()
@@ -48,9 +51,12 @@ namespace ProjectLightsOut.UI
 
     private void OnBossRegister(OnBossRegister e)
     {
-        boss = e.Boss;
-        boss.OnBossDamaged += OnBossHurt;
-        boss.OnBossHealed += OnBossHealed;
+        boss = e.Boss as IBoss;
+        if (boss != null)
+        {
+            boss.OnBossDamaged += OnBossHurt;
+            boss.OnBossHealed += OnBossHealed;
+        }
     }
 
     private void OnBossHealed()
@@ -118,7 +124,7 @@ namespace ProjectLightsOut.UI
     {
         healthBar.gameObject.SetActive(true);
 
-        boss = e.Boss;
+        boss = e.Boss as IBoss;
 
         StartCoroutine(BossReady());
     }

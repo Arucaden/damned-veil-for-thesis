@@ -16,12 +16,11 @@ namespace ProjectLightsOut.Gameplay
     }
 
     /// <summary>
-    /// Boss enemy — thin coordinator that delegates behavior to the current IBossPhase.
-    /// Phases: Idle → Phase1 → Stun → Phase2 → Dead.
+    /// Azaleth — the first boss. Has shield, teleport, and wave-spawning abilities.
+    /// Phases: Entrance → Phase1 → Transition (stun) → Phase2 → Dead.
     /// </summary>
-    public class Boss : Enemy
+    public class AzalethBoss : BossBase<AzalethBoss>
     {
-        // --- Serialized configuration ---
         [SerializeField] private List<WaveDataSO> firstPhaseWaves;
         [SerializeField] private List<WaveDataSO> secondPhaseWaves;
         [SerializeField] private ShieldEffect shieldEffect;
@@ -29,81 +28,59 @@ namespace ProjectLightsOut.Gameplay
         [SerializeField] private float maxSpawnCooldown = 4f;
         [SerializeField] private float teleportCooldownMax = 5f;
 
-        // --- Public accessors for phases ---
         public List<WaveDataSO> FirstPhaseWaves => firstPhaseWaves;
         public List<WaveDataSO> SecondPhaseWaves => secondPhaseWaves;
         public ShieldEffect ShieldEffect => shieldEffect;
-        public Animator Animator => animator;
-        [HideInInspector] public int MaxHealth;
-        public Action OnBossDamaged;
-        public Action OnBossHealed;
 
-        // --- Wave tracking (shared across phases) ---
         private List<ActiveWaveData> activeWaves = new List<ActiveWaveData>();
         private List<Enemy> activeEnemies = new List<Enemy>();
         private float spawnCooldown = 4f;
         private bool isSpawnNeeded = false;
-
-        // --- Teleport state ---
         private float teleportCooldown = 5f;
 
-        // --- State machine ---
-        private IBossPhase currentPhase;
-
-        public void SetPhase(IBossPhase newPhase)
-        {
-            currentPhase?.Exit(this);
-            currentPhase = newPhase;
-            currentPhase.Enter(this);
-        }
-
         // =================================================================
-        // Unity lifecycle
+        // Buff handling (Azaleth-specific)
         // =================================================================
 
-        protected override void Start()
+        protected override void OnEnable()
         {
-            EventManager.Broadcast(new OnBossRegister(this));
-            MaxHealth = health;
-            SetPhase(new BossIdlePhase());
-        }
-
-        private void Update()
-        {
-            currentPhase?.UpdatePhase(this);
-        }
-
-        private void OnEnable()
-        {
-            EventManager.AddListener<OnReadyBoss>(HandleReadyBoss);
-            EventManager.AddListener<OnEnemyRegister>(HandleEnemyRegister);
-            EventManager.AddListener<OnEnemyDead>(HandleEnemyDead);
+            base.OnEnable();
             EventManager.AddListener<OnBossBuff>(HandleBossBuff);
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
-            EventManager.RemoveListener<OnReadyBoss>(HandleReadyBoss);
-            EventManager.RemoveListener<OnEnemyRegister>(HandleEnemyRegister);
-            EventManager.RemoveListener<OnEnemyDead>(HandleEnemyDead);
+            base.OnDisable();
             EventManager.RemoveListener<OnBossBuff>(HandleBossBuff);
         }
 
-        // =================================================================
-        // Event handlers (delegate to current phase or manage shared state)
-        // =================================================================
-
-        private void HandleReadyBoss(OnReadyBoss e)
+        private void HandleBossBuff(OnBossBuff e)
         {
-            StartCoroutine(ReadyBossSequence());
+            // Delegate buff handling to current phase via a castable interface
+            if (currentAzalethPhase != null)
+            {
+                currentAzalethPhase.OnBuff(this, e);
+            }
         }
 
-        private void HandleEnemyRegister(OnEnemyRegister e)
+        private IAzalethPhase currentAzalethPhase;
+
+        public override void SetPhase(IBossPhase<AzalethBoss> newPhase)
+        {
+            currentAzalethPhase = newPhase as IAzalethPhase;
+            base.SetPhase(newPhase);
+        }
+
+        // =================================================================
+        // Enemy tracking (Azaleth-specific — manages wave enemy counts)
+        // =================================================================
+
+        protected override void HandleEnemyRegister(OnEnemyRegister e)
         {
             activeEnemies.Add(e.Enemy);
         }
 
-        private void HandleEnemyDead(OnEnemyDead e)
+        protected override void HandleEnemyDead(OnEnemyDead e)
         {
             activeEnemies.Remove(e.Enemy);
             ActiveWaveData activeWaveData = FindActiveWaveByEnemy(e.Enemy);
@@ -118,39 +95,35 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        private void HandleBossBuff(OnBossBuff e)
+        // =================================================================
+        // Lifecycle hooks
+        // =================================================================
+
+        protected override IBossPhase<AzalethBoss> CreateEntrancePhase()
         {
-            currentPhase?.OnBuff(this, e);
+            return new AzalethEntrancePhase();
+        }
+
+        protected override IBossPhase<AzalethBoss> CreateDeadPhase()
+        {
+            return new AzalethDeadPhase();
+        }
+
+        protected override IEnumerator OnEntranceComplete()
+        {
+            LevelManager.SpawnEnemyWave(firstPhaseWaves[0]);
+            ActiveWaveData activeWaveData = new ActiveWaveData();
+            activeWaveData.waveData = firstPhaseWaves[0];
+            activeWaveData.enemyCount = firstPhaseWaves[0].Enemies.Count;
+            activeWaves.Add(activeWaveData);
+
+            yield return null;
         }
 
         // =================================================================
-        // OnHit override — delegates to current phase
+        // Azaleth-specific abilities
         // =================================================================
 
-        public override void OnHit(int multiplier, Action OnTargetHit)
-        {
-            currentPhase?.OnHit(this, multiplier, OnTargetHit);
-        }
-
-        // =================================================================
-        // Helper methods called by phase classes
-        // =================================================================
-
-        /// <summary>
-        /// Applies damage to the boss. Called by combat phases.
-        /// </summary>
-        public void ApplyDamage(int multiplier, Action OnTargetHit)
-        {
-            health--;
-            OnDamaged?.Invoke(multiplier);
-            OnTargetHit?.Invoke();
-            OnBossDamaged?.Invoke();
-        }
-
-        /// <summary>
-        /// Attempts to spawn a new wave from the given source list.
-        /// Called by Phase1 (firstPhaseWaves) and Phase2 (secondPhaseWaves).
-        /// </summary>
         public void TrySpawnWave(List<WaveDataSO> sourceWaves)
         {
             if (activeWaves.Count <= 1)
@@ -179,9 +152,6 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        /// <summary>
-        /// Ticks the spawn cooldown timer. Called each frame by active combat phases.
-        /// </summary>
         public void TickSpawnCooldown()
         {
             if (spawnCooldown > 0 && isSpawnNeeded)
@@ -190,10 +160,6 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        /// <summary>
-        /// Ticks the teleport cooldown and triggers teleport when ready.
-        /// Called each frame by Phase2.
-        /// </summary>
         public void TickTeleportCooldown()
         {
             if (teleportCooldown > 0)
@@ -206,13 +172,10 @@ namespace ProjectLightsOut.Gameplay
             }
         }
 
-        /// <summary>
-        /// Teleports the boss to a random teleport point.
-        /// </summary>
         public IEnumerator Teleport(float delay)
         {
             IsHittable = false;
-            animator.SetTrigger("teleport");
+            BossAnimator.SetTrigger("teleport");
             shieldEffect.DeactivateShield();
             int random = UnityEngine.Random.Range(0, teleportPoints.Count - 1);
             if (spawnEffectPool != null)
@@ -230,40 +193,6 @@ namespace ProjectLightsOut.Gameplay
             IsHittable = true;
         }
 
-        // =================================================================
-        // Intro sequence (transitions from Idle → Phase1)
-        // =================================================================
-
-        private IEnumerator ReadyBossSequence()
-        {
-            EventManager.Broadcast(new OnSpotting(transform, 2f));
-
-            yield return new WaitForSeconds(3f);
-
-            EventManager.Broadcast(new OnSpottingEnd(1f));
-            EventManager.Broadcast(new OnZoomEnd(1f));
-
-            yield return new WaitForSeconds(1f);
-
-            EventManager.Broadcast(new OnBossReady(this));
-
-            LevelManager.SpawnEnemyWave(firstPhaseWaves[0]);
-            ActiveWaveData activeWaveData = new ActiveWaveData();
-            activeWaveData.waveData = firstPhaseWaves[0];
-            activeWaveData.enemyCount = firstPhaseWaves[0].Enemies.Count;
-            activeWaves.Add(activeWaveData);
-
-            yield return new WaitForSeconds(4.5f);
-
-            EventManager.Broadcast(new OnPlayerEnableShooting(true));
-
-            SetPhase(new BossPhase1());
-        }
-
-        // =================================================================
-        // Internal helpers
-        // =================================================================
-
         private ActiveWaveData FindActiveWaveByEnemy(Enemy enemy)
         {
             foreach (ActiveWaveData data in activeWaves)
@@ -275,5 +204,13 @@ namespace ProjectLightsOut.Gameplay
             }
             return null;
         }
+    }
+
+    /// <summary>
+    /// Extended phase interface for Azaleth-specific buff handling.
+    /// </summary>
+    public interface IAzalethPhase
+    {
+        void OnBuff(AzalethBoss boss, OnBossBuff e);
     }
 }

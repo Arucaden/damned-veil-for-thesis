@@ -7,12 +7,12 @@ using UnityEngine;
 namespace ProjectLightsOut.Gameplay
 {
     /// <summary>
-    /// Terminal state. Boss is dead — broadcasts death events,
-    /// plays death animation, camera effects. No further actions.
+    /// Dead phase — Azaleth is dead. Broadcasts death events,
+    /// plays death animation, camera effects. Terminal state.
     /// </summary>
-    public class BossDeadPhase : IBossPhase
+    public class AzalethDeadPhase : IBossPhase<AzalethBoss>, IAzalethPhase
     {
-        public void Enter(Boss boss)
+        public void Enter(AzalethBoss boss)
         {
             boss.IsHittable = false;
 
@@ -21,19 +21,19 @@ namespace ProjectLightsOut.Gameplay
             EventManager.Broadcast(new OnPlaySFX("Bell"));
             EventManager.Broadcast(new OnSlowTime(0.1f, 1.2f));
 
-            boss.Animator.SetTrigger("stun");
+            boss.BossAnimator.SetTrigger("stun");
             boss.StartCoroutine(LastZoom(boss));
         }
 
-        public void UpdatePhase(Boss boss) { }
+        public void UpdatePhase(AzalethBoss boss) { }
 
-        public void OnHit(Boss boss, int multiplier, Action OnTargetHit) { }
+        public void OnHit(AzalethBoss boss, int multiplier, Action OnTargetHit) { }
 
-        public void OnBuff(Boss boss, OnBossBuff e) { }
+        public void OnBuff(AzalethBoss boss, OnBossBuff e) { }
 
-        public void Exit(Boss boss) { }
+        public void Exit(AzalethBoss boss) { }
 
-        private IEnumerator LastZoom(Boss boss)
+        private IEnumerator LastZoom(AzalethBoss boss)
         {
             EventManager.Broadcast(new OnSpotting(boss.transform, 0.2f));
             EventManager.Broadcast(new OnZoom(-0.5f, 0.2f));

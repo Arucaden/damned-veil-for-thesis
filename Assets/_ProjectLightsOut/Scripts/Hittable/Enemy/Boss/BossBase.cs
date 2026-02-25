@@ -6,10 +6,6 @@ using UnityEngine;
 
 namespace ProjectLightsOut.Gameplay
 {
-    /// <summary>
-    /// Non-generic interface for boss UI and external systems
-    /// that don't need to know the specific boss type.
-    /// </summary>
     public interface IBoss
     {
         int Health { get; }
@@ -18,14 +14,6 @@ namespace ProjectLightsOut.Gameplay
         Action OnBossHealed { get; set; }
     }
 
-    /// <summary>
-    /// Abstract base for all bosses. Provides a generic state machine,
-    /// shared health/damage logic, and the standard boss lifecycle:
-    /// Entrance → Phase1 → Transition → Phase2 → Dead.
-    /// 
-    /// Subclasses implement boss-specific abilities and override
-    /// CreateEntrancePhase() and CreateDeadPhase() for their lifecycle.
-    /// </summary>
     public abstract class BossBase<T> : Enemy, IBoss where T : BossBase<T>
     {
         public int MaxHealth { get; set; }
@@ -33,7 +21,6 @@ namespace ProjectLightsOut.Gameplay
         public Action OnBossHealed { get; set; }
         public Animator BossAnimator => animator;
 
-        // Explicit interface implementation to expose inherited health via IBoss
         int IBoss.Health => Health;
 
         private IBossPhase<T> currentPhase;
@@ -71,7 +58,6 @@ namespace ProjectLightsOut.Gameplay
             EventManager.RemoveListener<OnEnemyDead>(HandleEnemyDead);
         }
 
-        // --- Event handlers (shared) ---
 
         private void HandleReadyBoss(OnReadyBoss e)
         {
@@ -81,7 +67,6 @@ namespace ProjectLightsOut.Gameplay
         protected virtual void HandleEnemyRegister(OnEnemyRegister e) { }
         protected virtual void HandleEnemyDead(OnEnemyDead e) { }
 
-        // --- Shared behavior ---
 
         public override void OnHit(int multiplier, Action OnTargetHit)
         {
@@ -96,7 +81,6 @@ namespace ProjectLightsOut.Gameplay
             OnBossDamaged?.Invoke();
         }
 
-        // --- Entrance sequence (shared camera work) ---
 
         private IEnumerator ReadyBossSequence()
         {
@@ -115,23 +99,10 @@ namespace ProjectLightsOut.Gameplay
             EventManager.Broadcast(new OnPlayerEnableShooting(true));
         }
 
-        // --- Abstract hooks for subclasses ---
-
-        /// <summary>
-        /// Called after the shared entrance camera sequence.
-        /// Subclass should spawn initial wave, set up abilities, etc.
-        /// Return the coroutine for any additional entrance logic.
-        /// </summary>
         protected abstract IEnumerator OnEntranceComplete();
 
-        /// <summary>
-        /// Create the initial entrance/idle phase for this boss.
-        /// </summary>
         protected abstract IBossPhase<T> CreateEntrancePhase();
 
-        /// <summary>
-        /// Create the dead phase for this boss.
-        /// </summary>
         protected abstract IBossPhase<T> CreateDeadPhase();
     }
 }

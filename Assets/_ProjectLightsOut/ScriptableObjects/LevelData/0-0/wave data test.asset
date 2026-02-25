@@ -15,7 +15,7 @@ MonoBehaviour:
   Enemies: []
   IsProcedural: 1
   ProceduralSettings:
-    EnemyCount: 3
+    EnemyCount: 4
     EnemyPool:
     - {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
     MinPathLength: 0.1
@@ -23,4 +23,4 @@ MonoBehaviour:
     SafeZoneRadius: 0.5
     MinEnemySpacing: 0.5
     EndPathBuffer: 0
-    WallBufferRadius: 0
+    WallBufferRadius: 0.5

@@ -119,9 +119,15 @@ MonoBehaviour:
   killEffect: {fileID: 4828271000770673910, guid: 1b4a5e15abd3a3a4daea1c8da0b010a0, type: 3}
   spawnEffectPool: {fileID: 0}
   killEffectPool: {fileID: 0}
-  firstPhaseWaves: []
+  firstPhaseWaves:
+  - {fileID: 11400000, guid: 524d1300a105fd84996efa7616bd2845, type: 2}
+  - {fileID: 11400000, guid: 2194175203a1ba449ba0f335aafcae82, type: 2}
+  - {fileID: 11400000, guid: b06e9e41404522241b5df791908c856e, type: 2}
+  - {fileID: 11400000, guid: bf39acd7492c99344809b5e665950a14, type: 2}
+  - {fileID: 11400000, guid: 6ba221ff1a9c58f4aa40f372463a4ea7, type: 2}
+  - {fileID: 11400000, guid: b019ff5e60d7d9c41be39bfb81647d4d, type: 2}
   secondPhaseWaves: []
-  shieldEffect: {fileID: 0}
+  shieldEffect: {fileID: 1641872266211832797}
   teleportPoints: []
   maxSpawnCooldown: 4
   teleportCooldownMax: 5

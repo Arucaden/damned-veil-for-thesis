@@ -115,7 +115,7 @@ namespace ProjectLightsOut.Managers
         private void OnCompleteCountingScore(OnCompleteCountingScore evt)
         {
             string nextLevel = LevelManager.LevelData.NextLevelScenes[Random.Range(0, LevelManager.LevelData.NextLevelScenes.Count)];
-            AppStateManager.Instance.GoToLevelSelect(nextLevel);
+            AppStateManager.Instance.GoToNextLevel(nextLevel);
         }
     }
 }

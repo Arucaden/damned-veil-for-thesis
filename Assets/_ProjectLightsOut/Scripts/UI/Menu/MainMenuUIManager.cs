@@ -15,7 +15,7 @@ namespace ProjectLightsOut.UI
         if (isPressed) return;
 
         isPressed = true;
-        AppStateManager.Instance.StartGameplay();
+        AppStateManager.Instance.GoToLevelSelection();
         EventManager.Broadcast(new OnPlaySFX("Boom1"));
     }
 

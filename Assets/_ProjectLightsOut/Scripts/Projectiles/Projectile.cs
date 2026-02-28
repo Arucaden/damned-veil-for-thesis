@@ -20,6 +20,11 @@ namespace ProjectLightsOut.Gameplay
 
         [HideInInspector] public SimplePool ParentPool;
 
+        // Freeze state (used by Kronos time field)
+        private bool isFrozen;
+        private Vector2 frozenDirection;
+        public bool IsFrozen => isFrozen;
+
         private void Awake()
         {
             if (rb == null)
@@ -32,12 +37,14 @@ namespace ProjectLightsOut.Gameplay
 
         private void Update()
         {
-            SelfDestruct();
+            if (!isFrozen)
+                SelfDestruct();
         }
 
         private void FixedUpdate()
         {
-            rb.linearVelocity = direction;
+            if (!isFrozen)
+                rb.linearVelocity = direction;
         }
 
         public void SetDirection(Vector2 direction)
@@ -128,6 +135,27 @@ namespace ProjectLightsOut.Gameplay
             destroyTimer = 10f;
             direction = Vector2.zero;
             rb.linearVelocity = Vector2.zero;
+            isFrozen = false;
+            frozenDirection = Vector2.zero;
+        }
+
+        // --- Freeze API (for Kronos time field) ---
+
+        public void Freeze()
+        {
+            if (isFrozen) return;
+            isFrozen = true;
+            frozenDirection = direction;
+            direction = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        public void Unfreeze()
+        {
+            if (!isFrozen) return;
+            isFrozen = false;
+            direction = frozenDirection;
+            frozenDirection = Vector2.zero;
         }
 
         private void SpawnEffect(Vector2 position, Vector2 normal)

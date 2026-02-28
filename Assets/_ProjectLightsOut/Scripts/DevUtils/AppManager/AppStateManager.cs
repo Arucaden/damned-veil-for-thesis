@@ -9,6 +9,7 @@ namespace ProjectLightsOut.DevUtils
     {
         Boot,
         MainMenu,
+        LevelSelection,
         Loading,
         Gameplay
     }
@@ -64,14 +65,14 @@ namespace ProjectLightsOut.DevUtils
             catch (System.Exception e) { Debug.LogException(e); }
         }
 
-        public async void StartGameplay()
+        public async void StartGameplay(string levelName)
         {
             try
             {
                 if (State == AppState.Gameplay) return;
                 
                 State = AppState.Loading;
-                await SceneLoader.SwitchToAsync("0-0");
+                await SceneLoader.SwitchToAsync(levelName);
                 
                 EventManager.Broadcast(new OnChangeGameState(GameState.Playing));
                 
@@ -80,7 +81,24 @@ namespace ProjectLightsOut.DevUtils
             catch (System.Exception e) { Debug.LogException(e); }
         }
 
-        public async void GoToLevelSelect(string level)
+        public async void GoToLevelSelection()
+        {
+            try
+            {
+                if (State == AppState.LevelSelection) return;
+                
+                State = AppState.Loading;
+                await SceneLoader.SwitchToAsync("LevelSelection");
+                
+                EventManager.Broadcast(new OnChangeGameState(GameState.GameOver));
+                EventManager.Broadcast(new OnPlayBGM("MainMenu"));
+                
+                State = AppState.LevelSelection;
+            }
+            catch (System.Exception e) { Debug.LogException(e); }
+        }
+
+        public async void GoToNextLevel(string level)
         {
             try
             {

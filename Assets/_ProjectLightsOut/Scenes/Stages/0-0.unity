@@ -4659,7 +4659,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -15
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1 &513982643
@@ -8497,7 +8497,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -665328895
   m_SortingLayer: 4
-  m_SortingOrder: 15
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1001 &1305937706
@@ -9613,7 +9613,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -665328895
   m_SortingLayer: 4
-  m_SortingOrder: 15
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1 &1889417877
@@ -11639,7 +11639,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5137147689921130649, guid: 62aff7f56776e5b419ea16a672c100c9, type: 3}
       propertyPath: jiggleFrequency
-      value: 0.5
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 6422191781533529796, guid: 62aff7f56776e5b419ea16a672c100c9, type: 3}
       propertyPath: 'endWaypoints.Array.data[0]'

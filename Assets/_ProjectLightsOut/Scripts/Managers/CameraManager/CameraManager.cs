@@ -6,6 +6,12 @@ namespace ProjectLightsOut.Managers
 {
     public class CameraManager : Singleton<CameraManager>
     {
+        [Header("Ambient Jiggle")]
+        [SerializeField] private bool useAmbientJiggle = true;
+        [SerializeField] private float jiggleFrequency = 0.5f;
+        [SerializeField] private float jiggleAmplitude = 0.1f;
+
+        [Space]
         [SerializeField] private Camera mainCamera;
         private Vector3 originalPosition;
         private float dampingSpeed = 1.0f;
@@ -15,11 +21,31 @@ namespace ProjectLightsOut.Managers
         private float originalOrthographicSize;
         private bool isSpotting = false;
 
+        private float jiggleSeedX;
+        private float jiggleSeedY;
+
         protected override void Awake()
         {
             base.Awake();
             originalPosition = mainCamera.transform.localPosition;
             originalOrthographicSize = mainCamera.orthographicSize;
+
+            jiggleSeedX = Random.Range(0f, 100f);
+            jiggleSeedY = Random.Range(0f, 100f);
+        }
+
+        private void Update()
+        {
+            if (!useAmbientJiggle) return;
+            if (cameraPanCoroutine != null || cameraShakeCoroutine != null || isSpotting) return;
+
+            jiggleSeedX += Time.unscaledDeltaTime * jiggleFrequency;
+            jiggleSeedY += Time.unscaledDeltaTime * jiggleFrequency;
+
+            float offsetX = (Mathf.PerlinNoise(jiggleSeedX, 0f) - 0.5f) * 2f * jiggleAmplitude;
+            float offsetY = (Mathf.PerlinNoise(0f, jiggleSeedY) - 0.5f) * 2f * jiggleAmplitude;
+
+            mainCamera.transform.localPosition = originalPosition + new Vector3(offsetX, offsetY, 0f);
         }
 
         private void OnEnable()

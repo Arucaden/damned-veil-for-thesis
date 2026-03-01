@@ -500,7 +500,7 @@ MonoBehaviour:
   fadeSettings:
     fadeInDuration: 0.5
     fadeOutDuration: 0.5
-    minLoadingTime: 2
+    minLoadingTime: 1
     postLoadDelay: 0.2
   fadeCanvasGroup: {fileID: 0}
   loadingScreen: {fileID: 918700064}
@@ -677,6 +677,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

@@ -194,6 +194,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e7b1bed8404e6f47a199804532aff76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useAmbientJiggle: 1
+  jiggleFrequency: 0.1
+  jiggleAmplitude: 0.09
   mainCamera: {fileID: 0}
 --- !u!1 &6314263886872949418
 GameObject:

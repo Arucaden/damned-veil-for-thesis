@@ -27,14 +27,20 @@ namespace ProjectLightsOut.DevUtils
         void Start()
         {
 #if UNITY_EDITOR
+            string activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (activeScene == "00_BootStrap")
             {
                 StartCoroutine(ShowSplashScreen());
             }
-            #else
+            else
             {
-                GoToMainMenu();
+                if (activeScene == "MainMenu") State = AppState.MainMenu;
+                else if (activeScene == "LevelSelection") State = AppState.LevelSelection;
+                else State = AppState.Gameplay;
             }
-            #endif
+#else
+            GoToMainMenu();
+#endif
         }
 
         private IEnumerator ShowSplashScreen()

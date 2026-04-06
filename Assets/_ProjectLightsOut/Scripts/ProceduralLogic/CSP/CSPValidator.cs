@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DamnedVeil.ProceduralLogic.Models;
-
+using UnityEngine.Tilemaps;
 namespace DamnedVeil.ProceduralLogic.CSP
 {
     /// <summary>
@@ -13,6 +13,10 @@ namespace DamnedVeil.ProceduralLogic.CSP
         [Header("Sampling Settings")]
         [Tooltip("Tag used to identify bounceable wall colliders")]
         [SerializeField] private string wallTag = "Ricochet";
+
+        [Header("Area Settings")]
+        [Tooltip("Optional: Tilemap defining the allowed spawn area. Tiles must be painted where spawning is permitted.")]
+        [SerializeField] private Tilemap spawnAreaTilemap;
 
         [Tooltip("Resolution for sampling points along the path (in world units)")]
         [SerializeField] private float samplingResolution = 0.5f;
@@ -53,9 +57,35 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 lastSampledPoints.Add(p.position);
             }
 
+            // Step 1.5: Filter by Spawn Area Constraint (Tilemap)
+            List<(Vector2 position, int segmentIndex)> areaFiltered = new List<(Vector2, int)>();
+            foreach (var point in sampledPoints)
+            {
+                if (spawnAreaTilemap != null)
+                {
+                    // Check if there is a tile at the sampled position
+                    Vector3Int cellPos = spawnAreaTilemap.WorldToCell(point.position);
+                    if (spawnAreaTilemap.HasTile(cellPos))
+                    {
+                        areaFiltered.Add(point);
+                    }
+                }
+                else
+                {
+                    // If no tilemap is assigned, don't filter
+                    areaFiltered.Add(point);
+                }
+            }
+
+            if (areaFiltered.Count < enemyCount)
+            {
+                Debug.LogWarning($"[CSPValidator] Not enough points after tilemap area filter: {areaFiltered.Count}/{enemyCount}");
+                return null;
+            }
+
             // Step 2: Filter by Safe Zone constraint (C3)
             List<(Vector2 position, int segmentIndex)> safeZoneFiltered = new List<(Vector2, int)>();
-            foreach (var point in sampledPoints)
+            foreach (var point in areaFiltered)
             {
                 float distanceToPlayer = Vector2.Distance(point.position, playerPosition);
                 if (distanceToPlayer > safeZoneRadius)

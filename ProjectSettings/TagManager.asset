@@ -43,11 +43,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 1388400443
+    locked: 0
   - name: Floor
     uniqueID: 3306955835
-    locked: 0
-  - name: Wall
-    uniqueID: 320579965
     locked: 0
   - name: Struct
     uniqueID: 1077729375
@@ -60,6 +60,9 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 1918644795
+    locked: 0
+  - name: Wall
+    uniqueID: 320579965
     locked: 0
   - name: Projectile
     uniqueID: 2588721013

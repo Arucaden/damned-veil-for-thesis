@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LevelScore: 1000
   Waves:
-  - {fileID: 11400000, guid: a67713d59aa8d4d48974e26f1a502f3b, type: 2}
-  Bullets: 6
+  - {fileID: 11400000, guid: 794af8b23829ddb4abd285effa6f535a, type: 2}
+  Bullets: 4
   AceTime: 60
   NextLevelScenes:
-  - Boss_1
+  - 1-2
   IsBossLevel: 0

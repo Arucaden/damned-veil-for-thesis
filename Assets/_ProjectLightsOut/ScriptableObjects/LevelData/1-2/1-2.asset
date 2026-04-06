@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b106158dd547cc04e9cb4113b3bc5888, type: 3}
-  m_Name: 0-0
+  m_Name: 1-2
   m_EditorClassIdentifier: 
   LevelScore: 1000
   Waves:
-  - {fileID: 11400000, guid: 794af8b23829ddb4abd285effa6f535a, type: 2}
-  Bullets: 4
+  - {fileID: 11400000, guid: a67713d59aa8d4d48974e26f1a502f3b, type: 2}
+  Bullets: 6
   AceTime: 60
   NextLevelScenes:
-  - 1-1
+  - 1-2
   IsBossLevel: 0

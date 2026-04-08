@@ -17,5 +17,5 @@ MonoBehaviour:
   Bullets: 6
   AceTime: 300
   NextLevelScenes:
-  - 0-1
+  - 2-1
   IsBossLevel: 1

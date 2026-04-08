@@ -18,6 +18,10 @@ namespace ProjectLightsOut.Gameplay
         private Action OnTargetHit;
         private int targetHit;
 
+        [Header("Combat Settings")]
+        [SerializeField] private int damage = 1;
+        public int Damage => damage;
+
         [HideInInspector] public SimplePool ParentPool;
 
         // Freeze state (used by Kronos time field)

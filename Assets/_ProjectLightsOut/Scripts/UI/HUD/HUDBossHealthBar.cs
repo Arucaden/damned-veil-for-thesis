@@ -13,8 +13,9 @@ namespace ProjectLightsOut.UI
     /// </summary>
     public class HUDBossHealthBar : MonoBehaviour
     {
-    [SerializeField] private Image healthBar;
-    [SerializeField] private RectTransform rectTransform;
+        [SerializeField] private TMPro.TextMeshProUGUI bossNameText;
+        [SerializeField] private Image healthBar;
+        [SerializeField] private RectTransform rectTransform;
     [SerializeField] private Vector2 retractPosition;
     [SerializeField] private CanvasGroup canvasGroup;
     private Vector2 originalPosition;
@@ -65,6 +66,11 @@ namespace ProjectLightsOut.UI
 
         healthBar.rectTransform.sizeDelta = new Vector2(fullHealth * ((float)health / boss.MaxHealth), healthBar.rectTransform.sizeDelta.y);
         
+        if (bossNameText != null)
+        {
+            bossNameText.text = boss.CurrentName;
+        }
+        
         if (healthColorCoroutine != null)
         {
             StopCoroutine(healthColorCoroutine);
@@ -78,6 +84,11 @@ namespace ProjectLightsOut.UI
         int health = boss.Health;
 
         healthBar.rectTransform.sizeDelta = new Vector2(fullHealth * ((float)health / boss.MaxHealth), healthBar.rectTransform.sizeDelta.y);
+
+        if (bossNameText != null)
+        {
+            bossNameText.text = boss.CurrentName;
+        }
     }
 
     private IEnumerator HealCoroutine()
@@ -125,6 +136,11 @@ namespace ProjectLightsOut.UI
         healthBar.gameObject.SetActive(true);
 
         boss = e.Boss as IBoss;
+
+        if (bossNameText != null)
+        {
+            bossNameText.text = boss.CurrentName;
+        }
 
         StartCoroutine(BossReady());
     }

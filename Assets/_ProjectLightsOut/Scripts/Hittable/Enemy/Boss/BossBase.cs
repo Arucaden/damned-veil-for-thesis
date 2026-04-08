@@ -8,6 +8,7 @@ namespace ProjectLightsOut.Gameplay
 {
     public interface IBoss
     {
+        string CurrentName { get; }
         int Health { get; }
         int MaxHealth { get; }
         Action OnBossDamaged { get; set; }
@@ -16,6 +17,12 @@ namespace ProjectLightsOut.Gameplay
 
     public abstract class BossBase<T> : Enemy, IBoss where T : BossBase<T>
     {
+        [Header("Boss Identity")]
+        [SerializeField] private string phase1Name = "Azaleth";
+        [SerializeField] private string phase2Name = "Azaleth, The Awakened";
+
+        public string CurrentName => Health <= MaxHealth / 2 ? phase2Name : phase1Name;
+
         public int MaxHealth { get; set; }
         public Action OnBossDamaged { get; set; }
         public Action OnBossHealed { get; set; }

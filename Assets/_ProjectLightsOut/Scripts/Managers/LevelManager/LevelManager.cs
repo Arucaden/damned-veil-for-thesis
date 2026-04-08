@@ -50,11 +50,17 @@ namespace ProjectLightsOut.Managers
 
         /// <summary>
         /// Static convenience method for Boss to trigger wave spawning.
-        /// Delegates to the WaveManager sibling component.
         /// </summary>
         public static void SpawnEnemyWave(WaveDataSO waveData)
         {
-            var waveManager = Instance.GetComponent<WaveManager>();
+            var waveManager = Instance.transform.parent.GetComponentInChildren<WaveManager>();
+            
+            if (waveManager == null)
+            {
+                Debug.LogError("[LevelManager] Cannot spawn enemy wave because no WaveManager component exists in the scene! Please add a WaveManager to your LevelManager object.");
+                return;
+            }
+
             Instance.StartCoroutine(waveManager.SpawnWave(waveData));
         }
     }

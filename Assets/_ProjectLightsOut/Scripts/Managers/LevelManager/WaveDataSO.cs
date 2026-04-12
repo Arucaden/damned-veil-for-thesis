@@ -19,7 +19,10 @@ namespace ProjectLightsOut.Managers
     {
         [Header("Enemy Configuration")]
         public int EnemyCount;
-        public List<GameObject> EnemyPool;
+        public List<ProceduralEnemyRatio> EnemyRatios;
+
+        [Tooltip("Max enemies allowed on a single straight path segment (before ricochet). 0 = unlimited.")]
+        public int MaxEnemiesPerSegment;
 
         [Header("Path Settings (0 = use component default)")]
         public float MinPathLength;
@@ -44,5 +47,12 @@ namespace ProjectLightsOut.Managers
         public GameObject EnemyPrefab;
         public Vector3 SpawnPosition;
         public float SpawnDelay;
+    }
+
+    [Serializable]
+    public struct ProceduralEnemyRatio
+    {
+        public GameObject EnemyPrefab;
+        [Min(1)] public int Ratio; // Relative weight (e.g., 4 basic, 1 special)
     }
 }

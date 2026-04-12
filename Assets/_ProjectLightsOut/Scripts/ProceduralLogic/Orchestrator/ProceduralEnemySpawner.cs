@@ -88,13 +88,14 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                     settings.SafeZoneRadius,
                     settings.MinEnemySpacing,
                     settings.EndPathBuffer,
-                    settings.WallBufferRadius
+                    settings.WallBufferRadius,
+                    settings.MaxEnemiesPerSegment
                 );
 
                 if (enemyPositions != null && enemyPositions.Count >= settings.EnemyCount)
                 {
                     // 3. Spawning Phase - Instantiate enemies
-                    SpawnEnemiesAtPositions(enemyPositions, settings.EnemyPool);
+                    SpawnEnemiesAtPositions(enemyPositions, settings.EnemyRatios);
                     currentPath = path;
 
                     // Visualize the path - ONLY IN EDITOR or if debug enabled
@@ -118,18 +119,38 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
         /// <summary>
         /// Spawns enemy prefabs at the validated positions.
         /// </summary>
-        private void SpawnEnemiesAtPositions(List<EnemySpawnData> positions, List<GameObject> enemyPool)
+        private void SpawnEnemiesAtPositions(List<EnemySpawnData> positions, List<ProceduralEnemyRatio> enemyRatios)
         {
-            if (enemyPool == null || enemyPool.Count == 0)
+            if (enemyRatios == null || enemyRatios.Count == 0)
             {
-                Debug.LogError("[ProceduralEnemySpawner] EnemyPool is empty! Cannot spawn enemies.");
+                Debug.LogError("[ProceduralEnemySpawner] EnemyRatios list is empty! Cannot spawn enemies.");
                 return;
+            }
+
+            // Calculate total weight for ratio distribution
+            int totalWeight = 0;
+            foreach (var ratio in enemyRatios)
+            {
+                totalWeight += ratio.Ratio;
             }
 
             for (int i = 0; i < positions.Count; i++)
             {
                 var spawnData = positions[i];
-                GameObject prefab = enemyPool[UnityEngine.Random.Range(0, enemyPool.Count)];
+                
+                // Weighted Random Selection
+                int randomWeight = UnityEngine.Random.Range(0, totalWeight);
+                GameObject prefab = enemyRatios[0].EnemyPrefab;
+                int currentWeight = 0;
+                foreach (var ratioData in enemyRatios)
+                {
+                    currentWeight += ratioData.Ratio;
+                    if (randomWeight < currentWeight)
+                    {
+                        prefab = ratioData.EnemyPrefab;
+                        break;
+                    }
+                }
                 
                 GameObject enemyObj = Instantiate(
                     prefab,

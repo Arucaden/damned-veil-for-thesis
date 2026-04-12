@@ -40,7 +40,8 @@ namespace DamnedVeil.ProceduralLogic.CSP
             float safeZoneRadius,
             float minEnemySpacing,
             float endPathBuffer,
-            float wallBufferRadius)
+            float wallBufferRadius,
+            int maxEnemiesPerSegment = 0)
         {
 
             if (pathData == null || pathData.PathPoints.Count < 2)
@@ -134,8 +135,8 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 return null;
             }
 
-            // Step 5: Select random points respecting spacing constraint (C1)
-            List<EnemySpawnData> selectedEnemies = SelectSpacedPoints(wallFiltered, minEnemySpacing, enemyCount);
+            // Step 5: Select random points respecting spacing constraint (C1) and max per segment
+            List<EnemySpawnData> selectedEnemies = SelectSpacedPoints(wallFiltered, minEnemySpacing, enemyCount, maxEnemiesPerSegment);
 
             lastValidPoints.Clear();
             foreach (var enemy in selectedEnemies)
@@ -179,11 +180,12 @@ namespace DamnedVeil.ProceduralLogic.CSP
         }
 
         /// <summary>
-        /// Selects random points from the pool while respecting spacing constraints.
+        /// Selects random points from the pool while respecting spacing constraints and segment limits.
         /// </summary>
-        private List<EnemySpawnData> SelectSpacedPoints(List<(Vector2 position, int segmentIndex)> availablePoints, float spacing, int maxCount)
+        private List<EnemySpawnData> SelectSpacedPoints(List<(Vector2 position, int segmentIndex)> availablePoints, float spacing, int maxCount, int maxPerSegment)
         {
             List<EnemySpawnData> selected = new List<EnemySpawnData>();
+            Dictionary<int, int> countsPerSegment = new Dictionary<int, int>();
 
             // Shuffle the available points for randomness
             List<(Vector2 position, int segmentIndex)> shuffled = new List<(Vector2, int)>(availablePoints);
@@ -193,6 +195,13 @@ namespace DamnedVeil.ProceduralLogic.CSP
             {
                 if (selected.Count >= maxCount)
                     break;
+
+                // Check Max Segment Count (if limit > 0)
+                if (maxPerSegment > 0)
+                {
+                    countsPerSegment.TryGetValue(point.segmentIndex, out int currentCount);
+                    if (currentCount >= maxPerSegment) continue;
+                }
 
                 // Check spacing against already selected points
                 bool canPlace = true;
@@ -208,6 +217,11 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 if (canPlace)
                 {
                     selected.Add(new EnemySpawnData(point.position, point.segmentIndex));
+                    
+                    if (countsPerSegment.ContainsKey(point.segmentIndex))
+                        countsPerSegment[point.segmentIndex]++;
+                    else
+                        countsPerSegment[point.segmentIndex] = 1;
                 }
             }
 

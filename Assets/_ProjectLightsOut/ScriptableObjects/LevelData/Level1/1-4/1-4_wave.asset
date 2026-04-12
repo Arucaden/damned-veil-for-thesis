@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 37ddf6c4f99bec3489c157007f29a719, type: 3}
-  m_Name: 1-3_wave
+  m_Name: 1-4_wave
   m_EditorClassIdentifier: 
   Enemies: []
   IsProcedural: 1
   ProceduralSettings:
     EnemyCount: 4
-    EnemyPool:
-    - {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
+    EnemyRatios:
+    - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
+      Ratio: 4
+    MaxEnemiesPerSegment: 2
     MinPathLength: 0
     MaxBounces: 4
     SafeZoneRadius: 0

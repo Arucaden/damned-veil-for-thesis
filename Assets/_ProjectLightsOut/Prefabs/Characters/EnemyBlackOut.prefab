@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6957920184936114861}
   - component: {fileID: 4557986534621900417}
-  - component: {fileID: 310372108234853807}
   - component: {fileID: 6205325392130395573}
+  - component: {fileID: -2266306219418268071}
   m_Layer: 3
-  m_Name: Enemy
+  m_Name: EnemyBlackOut
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -72,29 +72,6 @@ CapsuleCollider2D:
   m_Offset: {x: -0.0024015605, y: -0.022013694}
   m_Size: {x: 0.2231184, y: 0.403153}
   m_Direction: 0
---- !u!114 &310372108234853807
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 365808678759055077}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3abc28aa605b42a43a73cdf916b30125, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  health: 1
-  immortal: 0
-  score: 1000
-  animator: {fileID: 6205325392130395573}
-  SpawnEffect: {fileID: 7541505187178390245, guid: ff287df4c47027946b37b07793d65d6a, type: 3}
-  col2d: {fileID: 4557986534621900417}
-  spriteRenderer: {fileID: 8786855991384722968}
-  shadowRenderer: {fileID: 5603469209406197005}
-  killEffect: {fileID: 4828271000770673910, guid: 1b4a5e15abd3a3a4daea1c8da0b010a0, type: 3}
-  spawnEffectPool: {fileID: 0}
-  killEffectPool: {fileID: 0}
 --- !u!95 &6205325392130395573
 Animator:
   serializedVersion: 7
@@ -117,6 +94,32 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-2266306219418268071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365808678759055077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8bd46210240d4940bf5b4ff7921a2c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.BlackoutEnemy
+  health: 1
+  immortal: 0
+  score: 1000
+  animator: {fileID: 6205325392130395573}
+  SpawnEffect: {fileID: 7541505187178390245, guid: ff287df4c47027946b37b07793d65d6a, type: 3}
+  col2d: {fileID: 4557986534621900417}
+  spriteRenderer: {fileID: 8786855991384722968}
+  shadowRenderer: {fileID: 5603469209406197005}
+  killEffect: {fileID: 4828271000770673910, guid: 1b4a5e15abd3a3a4daea1c8da0b010a0, type: 3}
+  spawnEffectPool: {fileID: 0}
+  killEffectPool: {fileID: 0}
+  flickerCount: 2
+  flickerInterval: 0.2
+  fadeTransitionTime: 0.6
 --- !u!1 &951517006829376108
 GameObject:
   m_ObjectHideFlags: 0
@@ -176,7 +179,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -200,7 +203,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 860997887, guid: 478e04b7d8ca56d4c9c315dcec772f1e, type: 3}
-  m_Color: {r: 0.690566, g: 0.690566, b: 0.690566, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

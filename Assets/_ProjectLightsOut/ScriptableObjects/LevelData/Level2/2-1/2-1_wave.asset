@@ -17,10 +17,10 @@ MonoBehaviour:
   ProceduralSettings:
     EnemyCount: 6
     EnemyRatios:
-    - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
-      Ratio: 5
     - EnemyPrefab: {fileID: 365808678759055077, guid: 64a71388e1484be439bc0c29722216f2, type: 3}
       Ratio: 1
+    - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
+      Ratio: 5
     MaxEnemiesPerSegment: 3
     MinPathLength: 0.1
     MaxBounces: 6

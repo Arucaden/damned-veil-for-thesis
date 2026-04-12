@@ -8,8 +8,6 @@ namespace ProjectLightsOut.Gameplay
     {
         [Header("References")]
         [SerializeField] private PlayerShoot playerShoot; // To read state and stats
-        [SerializeField] private Transform laserSpawnPoint;
-        [SerializeField] private GameObject bulletPrefab; // Used to get collider radius
         
         [Header("Visual Settings")]
         [SerializeField] private Gradient normalGradient;
@@ -29,10 +27,10 @@ namespace ProjectLightsOut.Gameplay
             if (playerShoot == null)
                 playerShoot = GetComponentInParent<PlayerShoot>();
 
-            if (bulletPrefab != null)
+            if (playerShoot != null && playerShoot.BulletPrefab != null)
             {
-                bulletCollider = bulletPrefab.GetComponent<CircleCollider2D>();
-                bulletRadiusInWorldSpace = bulletCollider.radius * Mathf.Max(bulletPrefab.transform.lossyScale.x, bulletPrefab.transform.lossyScale.y);
+                bulletCollider = playerShoot.BulletPrefab.GetComponent<CircleCollider2D>();
+                bulletRadiusInWorldSpace = bulletCollider.radius * Mathf.Max(playerShoot.BulletPrefab.transform.lossyScale.x, playerShoot.BulletPrefab.transform.lossyScale.y);
             }
         }
 
@@ -48,9 +46,18 @@ namespace ProjectLightsOut.Gameplay
 
         private void AimAndRotate()
         {
-            Vector2 direction = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+            // Rotate the root PlayerShoot object so everything (including sprites) follows the mouse
+            Vector2 direction = Camera.main.ScreenToWorldPoint(Input.mousePosition) - playerShoot.transform.position;
             Direction = direction;
-            transform.rotation = Quaternion.LookRotation(Vector3.forward, direction);
+            
+            Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, direction);
+            playerShoot.transform.rotation = targetRotation;
+            
+            // If this script is attached to a disconnected object, explicitly rotate it too
+            if (transform != playerShoot.transform) 
+            {
+                transform.rotation = targetRotation;
+            }
         }
 
         private void DrawDynamicLaser()
@@ -66,10 +73,10 @@ namespace ProjectLightsOut.Gameplay
             lineRenderer.colorGradient = playerShoot.Reloading ? reloadGradient : normalGradient;
 
             List<Vector3> points = new List<Vector3>();
-            points.Add(laserSpawnPoint.position);
+            points.Add(transform.position);
 
-            Vector2 currentPosition = laserSpawnPoint.position;
-            Vector2 currentDirection = laserSpawnPoint.up; // We face the mouse, so UP is forward
+            Vector2 currentPosition = transform.position;
+            Vector2 currentDirection = transform.up; // We face the mouse, so UP is forward
             int remainingBounces = playerShoot.Ricochets; // Read directly from player stats
             float distanceRemaining = maxLaserDistance;
 
@@ -106,16 +113,24 @@ namespace ProjectLightsOut.Gameplay
 
                 if (hitOccurred && closestHit.distance > 0)
                 {
-                    // Add hit point to our renderer
-                    points.Add((Vector3)closestHit.point);
+                    // Calculate the TRUE center point of the bounce
+                    // Since we casted from the edges, the hit.point is on the edge of the bullet's width.
+                    // We must shift it back to the true center to prevent the next origin from being inside the wall.
+                    Vector2 trueCenterBouncePoint = closestHit == hitLeft 
+                        ? closestHit.point + rightOffset 
+                        : closestHit.point - rightOffset;
+
+                    // Add the true center hit point to our renderer
+                    points.Add((Vector3)trueCenterBouncePoint);
                     
                     // Deduct distance
                     distanceRemaining -= closestHit.distance;
 
                     // Update direction and position for the next bounce iteration
                     currentDirection = Vector2.Reflect(currentDirection, closestHit.normal);
-                    // Move slightly off the wall to prevent raycasting into the same wall twice
-                    currentPosition = closestHit.point + currentDirection * 0.01f;
+                    
+                    // Push the origin slightly forward along the reflected path AND the normal to ensure we completely escape the wall's collider surface.
+                    currentPosition = trueCenterBouncePoint + currentDirection * 0.05f + closestHit.normal * 0.01f;
 
                     // If we're out of distance, break entirely
                     if (distanceRemaining <= 0) break;

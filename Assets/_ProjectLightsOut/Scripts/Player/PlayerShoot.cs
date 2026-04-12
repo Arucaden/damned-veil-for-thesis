@@ -26,7 +26,11 @@ namespace ProjectLightsOut.Gameplay
         [SerializeField] private SimplePool bulletPool;
         private CircleCollider2D bulletCollider;
         [SerializeField] private Transform bulletSpawnPoint;
+        [SerializeField] private Transform laserSpawnPoint;
         [SerializeField] private float bulletSpeed = 10f;
+        
+        public GameObject BulletPrefab => bulletPrefab;
+        public Transform LaserSpawnPoint => laserSpawnPoint;
         private bool isFiringEnabled = false;
         public bool IsFiringEnabled {
             get => isFiringEnabled;

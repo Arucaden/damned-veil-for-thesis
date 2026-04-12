@@ -130,4 +130,16 @@ namespace ProjectLightsOut.Managers
 
     public class OnReadyBoss : GameEvent
     {}
+
+    public class OnToggleBlackout : GameEvent
+    {
+        public bool EnableDarkness;
+        public float TransitionTime;
+
+        public OnToggleBlackout(bool enableDarkness, float transitionTime)
+        {
+            EnableDarkness = enableDarkness;
+            TransitionTime = transitionTime;
+        }
+    }
 }

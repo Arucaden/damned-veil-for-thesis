@@ -207,7 +207,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1658131981080366066}
-  - {fileID: 5893559588047533562}
   m_Father: {fileID: 566875025673662859}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6863977446135733860
@@ -227,7 +226,7 @@ MonoBehaviour:
   bulletPrefab: {fileID: 50413372797159726, guid: 66d509b76433a4e4ca43ab63f9ccec8d, type: 3}
   bulletPool: {fileID: 0}
   bulletSpawnPoint: {fileID: 1658131981080366066}
-  laserSpawnPoint: {fileID: 5893559588047533562}
+  laserSpawnPoint: {fileID: 0}
   bulletSpeed: 3
 --- !u!1 &3527966186513288464
 GameObject:
@@ -531,6 +530,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.PlayerLaserAimer
   playerShoot: {fileID: 6863977446135733860}
+  laserSpawnPoint: {fileID: 1658131981080366066}
   normalGradient:
     serializedVersion: 2
     key0: {r: 1, g: 1, b: 1, a: 1}
@@ -927,34 +927,3 @@ MonoBehaviour:
   playerShoot: {fileID: 6863977446135733860}
   playerMove: {fileID: 4493876469829515785}
   castEffectAnimator: {fileID: 20697741224190683}
---- !u!1 &8848210249247887014
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5893559588047533562}
-  m_Layer: 0
-  m_Name: LaserSpawnPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5893559588047533562
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8848210249247887014}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.121, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3038933223901937764}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

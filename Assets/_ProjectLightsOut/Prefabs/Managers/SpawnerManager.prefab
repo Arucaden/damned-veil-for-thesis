@@ -46,9 +46,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 634e3be442179096a8af01bdbe8d25ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Project::DamnedVeil.ProceduralLogic.PathGeneration.SpecularPathGenerator
-  wallLayer:
+  excludeLayers:
     serializedVersion: 2
     m_Bits: 0
+  bounceTag: Ricochet
   maxBounces: 6
   maxRayDistance: 100
   showDebugGizmos: 1
@@ -65,12 +66,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13728671cdbd845dc82b1840bdd1c6fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Project::DamnedVeil.ProceduralLogic.CSP.CSPValidator
-  safeZoneRadius: 3
-  minEnemySpacing: 2
-  minEnemyCount: 2
-  maxEnemyCount: 5
+  wallTag: Ricochet
+  spawnAreaTilemap: {fileID: 0}
   samplingResolution: 0.5
-  endPathBuffer: 1
   showDebugGizmos: 1
   validPointColor: {r: 0, g: 1, b: 0, a: 1}
   invalidPointColor: {r: 1, g: 0, b: 0, a: 1}
@@ -88,10 +86,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Project::DamnedVeil.ProceduralLogic.Orchestrator.ProceduralEnemySpawner
   pathGenerator: {fileID: 708672791331205540}
   cspValidator: {fileID: 2936603706708595509}
-  enemyPrefab: {fileID: 0}
   playerTransform: {fileID: 0}
-  maxAttempts: 100
+  maxAttempts: 1000
   minPathLength: 5
+  bulletPrefab: {fileID: 0}
   pathLineRenderer: {fileID: 0}
   showPath: 1
   pathColor: {r: 0, g: 1, b: 1, a: 1}

@@ -15,10 +15,10 @@ MonoBehaviour:
   Enemies: []
   IsProcedural: 1
   ProceduralSettings:
-    EnemyCount: 4
+    EnemyCount: 3
     EnemyRatios:
     - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
-      Ratio: 4
+      Ratio: 3
     MaxEnemiesPerSegment: 2
     MinPathLength: 0
     MaxBounces: 4

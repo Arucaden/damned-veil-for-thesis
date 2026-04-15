@@ -69,6 +69,8 @@ namespace ProjectLightsOut.Hittable
             }
         }
 
+        public event Action OnWallDestroyed;
+
         private void TakeDamage(int damage)
         {
             if (currentHealth <= 0) return; // Prevent double trigger
@@ -77,6 +79,8 @@ namespace ProjectLightsOut.Hittable
 
             if (currentHealth <= 0)
             {
+                OnWallDestroyed?.Invoke();
+                
                 // Disable colliders immediately to prevent Projectile from getting stuck in OnCollisionStay2D!
                 Collider2D[] allColliders = GetComponentsInChildren<Collider2D>();
                 foreach (Collider2D col in allColliders) col.enabled = false;

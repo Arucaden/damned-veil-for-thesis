@@ -107,9 +107,6 @@ namespace ProjectLightsOut.Managers
             yield return new WaitForSeconds(1.5f);
 
             EventManager.Broadcast(new OnPlayerEnableShooting(true));
-
-            // Trigger initial wave check (spawns first wave if no pre-placed enemies)
-            waveManager?.TriggerInitialWaveCheck();
         }
 
         private void OnCompleteCountingScore(OnCompleteCountingScore evt)

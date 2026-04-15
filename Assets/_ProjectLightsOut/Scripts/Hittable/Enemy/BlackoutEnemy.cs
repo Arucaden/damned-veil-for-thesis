@@ -9,6 +9,9 @@ namespace ProjectLightsOut.Gameplay
     public class BlackoutEnemy : Enemy
     {
         [Header("Blackout Ability Settings")]
+        [Tooltip("Delay in seconds before the enemy begins casting the blackout (starts after spawning)")]
+        [SerializeField] private float initialDelay = 1f;
+
         [Tooltip("How many times the light flickers before total blackout")]
         [SerializeField] private int flickerCount = 3;
         
@@ -31,15 +34,17 @@ namespace ProjectLightsOut.Gameplay
             EventManager.Broadcast(new OnToggleBlackout(false, 0.2f));
         }
 
+        private Coroutine blackoutCoroutine;
+
         private void TriggerBlackoutAbility()
         {
-            StartCoroutine(BlackoutRoutine());
+            blackoutCoroutine = StartCoroutine(BlackoutRoutine());
         }
 
         private IEnumerator BlackoutRoutine()
         {
-            // Wait a moment after spawning before starting the ability
-            yield return new WaitForSeconds(1f);
+            // Wait for the customizable delay after spawning before starting the ability
+            yield return new WaitForSeconds(initialDelay);
             
             Debug.Log("[BlackoutEnemy] Ability started! Flickering lights...");
 
@@ -73,7 +78,11 @@ namespace ProjectLightsOut.Gameplay
             // 1. When he dies, the dark cloud should be gone
             if (Health <= 0)
             {
-                StopAllCoroutines(); 
+                if (blackoutCoroutine != null)
+                {
+                    StopCoroutine(blackoutCoroutine);
+                    blackoutCoroutine = null;
+                }
                 
                 // Swiftly restore light since the enemy died. This clears the dark cloud.
                 Debug.Log("[BlackoutEnemy] Enemy caster died! Dark cloud is fading away immediately...");

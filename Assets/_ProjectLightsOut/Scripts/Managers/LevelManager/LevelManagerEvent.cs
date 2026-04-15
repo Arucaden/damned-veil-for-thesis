@@ -142,4 +142,13 @@ namespace ProjectLightsOut.Managers
             TransitionTime = transitionTime;
         }
     }
+
+    public class OnCombatWavesCompleted : GameEvent
+    {
+        public Enemy LastEnemyDead;
+        public OnCombatWavesCompleted(Enemy lastEnemyDead)
+        {
+            LastEnemyDead = lastEnemyDead;
+        }
+    }
 }

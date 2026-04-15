@@ -29,12 +29,24 @@ namespace ProjectLightsOut.Gameplay
         private Vector2 frozenDirection;
         public bool IsFrozen => isFrozen;
 
+        private float bulletRadius = 0.1f;
+        private LayerMask collisionMask;
+
         private void Awake()
         {
             if (rb == null)
             {
                 Debug.LogError($"{name}: Rigidbody2D is not assigned!");
             }
+            
+            // Switch to Kinematic to bypass black-box physics resolving that causes stuttering/sticking
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+            CircleCollider2D col = GetComponent<CircleCollider2D>();
+            if (col != null) bulletRadius = col.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y);
+
+            collisionMask = ~(1 << LayerMask.NameToLayer("Ignore Laser") | 1 << LayerMask.NameToLayer("Projectile"));
 
             OnTargetHit = () => { maxRicochetCount++; };
         }
@@ -47,18 +59,74 @@ namespace ProjectLightsOut.Gameplay
 
         private void FixedUpdate()
         {
-            if (!isFrozen)
-                rb.linearVelocity = direction;
+            if (isFrozen || direction.sqrMagnitude == 0) return;
+
+            float distanceToMove = direction.magnitude * Time.fixedDeltaTime;
+            Vector2 currentPos = rb.position;
+            Vector2 moveDir = direction.normalized;
+
+            // Execute the exact same mathematical sweep the Laser Aimer uses
+            RaycastHit2D hit = Physics2D.CircleCast(currentPos, bulletRadius, moveDir, distanceToMove, collisionMask);
+
+            if (hit.collider != null && hit.distance > 0)
+            {
+                if (hit.collider.CompareTag("Ricochet"))
+                {
+                    destroyTimer = 10f;
+                    EventManager.Broadcast(new OnPlaySFX("WallHit"));
+
+                    // Manually notify solid destructibles (like DestructibleWall) about the hit
+                    // because Kinematic bodies no longer trigger OnCollisionEnter2D
+                    IHittable hittable = hit.collider.GetComponent<IHittable>();
+                    if (hittable != null && hittable.IsHittable) hittable.OnHit(damage, OnTargetHit);
+                    
+                    if (ricochetCount < maxRicochetCount)
+                    {
+                        ricochetCount++;
+                        
+                        // Advance exactly to the mathematical impact centroid
+                        Vector2 impactCenter = hit.centroid;
+                        
+                        direction = Vector2.Reflect(direction, hit.normal);
+                        transform.up = direction;
+
+                        // Offset the remainder using the unified 0.05f constant
+                        rb.MovePosition(impactCenter + hit.normal * 0.05f);
+                    }
+                    else
+                    {
+                        DestroyProjectile();
+                        return;
+                    }
+
+                    EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
+                    SpawnEffect(hit.point + hit.normal * 0.05f, hit.normal);
+                }
+                else if (!hit.collider.isTrigger)
+                {
+                    // Solid wall without ricochet capabilities
+                    IHittable hittable = hit.collider.GetComponent<IHittable>();
+                    if (hittable != null && hittable.IsHittable) hittable.OnHit(damage, OnTargetHit);
+
+                    SpawnEffect(hit.point + hit.normal * 0.05f, hit.normal);
+                    DestroyProjectile();
+                }
+                else 
+                {
+                    // Hit a purely visual/trigger collider (like an enemy), ignore the wall collision and proceed
+                    rb.MovePosition(currentPos + moveDir * distanceToMove);
+                }
+            }
+            else
+            {
+                // No geometric impact, advance normally
+                rb.MovePosition(currentPos + moveDir * distanceToMove);
+            }
         }
 
         public void SetDirection(Vector2 direction)
         {
             this.direction = direction;
-        }
-
-        private void OnCollisionStay2D(Collision2D collision)
-        {
-            CheckTargetCollision(collision);
         }
 
         private void OnTriggerEnter2D(Collider2D collider)
@@ -80,31 +148,6 @@ namespace ProjectLightsOut.Gameplay
 
                 SpawnHitEffect(collider.transform.position, collider.transform.up);
             }
-        }
-
-        private void CheckTargetCollision(Collision2D collision)
-        {
-            if (collision.gameObject.CompareTag("Ricochet"))
-            {
-                destroyTimer = 10f;
-                EventManager.Broadcast(new OnPlaySFX("WallHit"));
-                
-                if (ricochetCount < maxRicochetCount)
-                {
-                    ricochetCount++;
-                    direction = Vector2.Reflect(direction, collision.GetContact(0).normal);
-                    transform.up = direction;
-                }
-
-                else
-                {
-                    DestroyProjectile();
-                }
-
-                EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
-            }
-
-            SpawnEffect(collision.GetContact(0).point + collision.GetContact(0).normal * 0.05f, collision.GetContact(0).normal);
         }
 
         private void SelfDestruct()

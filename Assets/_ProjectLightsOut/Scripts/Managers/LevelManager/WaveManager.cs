@@ -60,9 +60,20 @@ namespace ProjectLightsOut.Managers
         /// or trigger level completion.
         /// </summary>
 
+        public bool AllWavesDefeated { get; private set; }
+
+        public delegate bool WaveLoopCondition();
+        
+        /// <summary>
+        /// External riddles can hook into this. If this returns true, the current wave
+        /// will infinitely loop instead of completing combat.
+        /// </summary>
+        public WaveLoopCondition ShouldLoopWaves;
+
         private void CheckAllEnemiesDead(Enemy enemyDead)
         {
             if (LevelManager.LevelData.IsBossLevel) return;
+            if (AllWavesDefeated) return;
 
             if (enemies.Count == 0)
             {
@@ -73,23 +84,22 @@ namespace ProjectLightsOut.Managers
                 }
                 else
                 {
-                    EventManager.Broadcast(new OnPlaySFX("Bell"));
-                    StartCoroutine(LastEnemyZoom(enemyDead));
-                    EventManager.Broadcast(new OnSlowTime(0.1f, 1.2f));
-                    EventManager.Broadcast(new OnTriggerLevelComplete());
+                    // Check if an external system (like PillarsRiddle) is forcing a loop!
+                    if (ShouldLoopWaves != null && ShouldLoopWaves.Invoke())
+                    {
+                        // Spawn the LAST wave over again!
+                        int lastWaveIndex = currentWave - 1;
+                        if (lastWaveIndex >= 0)
+                        {
+                            StartCoroutine(SpawnWave(LevelManager.LevelData.Waves[lastWaveIndex]));
+                            return; // Stop here, do not finish combat!
+                        }
+                    }
+
+                    AllWavesDefeated = true;
+                    EventManager.Broadcast(new OnCombatWavesCompleted(enemyDead));
                 }
             }
-        }
-
-        private IEnumerator LastEnemyZoom(Enemy lastEnemy)
-        {
-            EventManager.Broadcast(new OnSpotting(lastEnemy.transform, 0.2f));
-            EventManager.Broadcast(new OnZoom(-0.5f, 0.2f));
-
-            yield return new WaitForSecondsRealtime(1.2f);
-
-            EventManager.Broadcast(new OnSpottingEnd(0.4f));
-            EventManager.Broadcast(new OnZoomEnd(0.4f));
         }
 
         /// <summary>

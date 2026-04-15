@@ -17,6 +17,12 @@ namespace ProjectLightsOut.Managers
 
         [SerializeField] private WaveManager waveManager;
         [SerializeField] private LevelFlowController flowController;
+        private LevelProgressionValidator progressionValidator;
+
+        private void Awake()
+        {
+            progressionValidator = FindObjectOfType<LevelProgressionValidator>();
+        }
 
         private void OnEnable()
         {
@@ -57,9 +63,20 @@ namespace ProjectLightsOut.Managers
                 StartCoroutine(LevelComplete());
             }
 
-            if (activeProjectiles == 0 && waveManager != null && waveManager.Enemies.Count > 0 && bulletRemaining <= 0)
+            if (activeProjectiles == 0 && bulletRemaining <= 0 && !isLevelComplete)
             {
-                if (!LevelManager.LevelData.IsBossLevel)
+                bool definitelyStuck = false;
+
+                if (waveManager != null && waveManager.Enemies.Count > 0)
+                {
+                    definitelyStuck = true; // Still enemies alive
+                }
+                else if (progressionValidator != null && progressionValidator.HasUnsolvedRiddles())
+                {
+                    definitelyStuck = true; // Stuck staring at a riddle with no ammo
+                }
+
+                if (definitelyStuck && !LevelManager.LevelData.IsBossLevel)
                 {
                     StartCoroutine(GameOver());
                 }

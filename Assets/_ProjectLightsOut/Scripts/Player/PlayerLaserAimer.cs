@@ -8,6 +8,8 @@ namespace ProjectLightsOut.Gameplay
     {
         [Header("References")]
         [SerializeField] private PlayerShoot playerShoot; // To read state and stats
+        [Tooltip("Optional: Drop a child GameObject here to determine exactly where the laser starts drawing.")]
+        [SerializeField] private Transform laserSpawnPoint;
         
         [Header("Visual Settings")]
         [SerializeField] private Gradient normalGradient;
@@ -73,9 +75,10 @@ namespace ProjectLightsOut.Gameplay
             lineRenderer.colorGradient = playerShoot.Reloading ? reloadGradient : normalGradient;
 
             List<Vector3> points = new List<Vector3>();
-            points.Add(transform.position);
+            Vector2 startPosition = laserSpawnPoint != null ? (Vector2)laserSpawnPoint.position : (Vector2)transform.position;
+            points.Add(startPosition);
 
-            Vector2 currentPosition = transform.position;
+            Vector2 currentPosition = startPosition;
             Vector2 currentDirection = transform.up; // We face the mouse, so UP is forward
             int remainingBounces = playerShoot.Ricochets; // Read directly from player stats
             float distanceRemaining = maxLaserDistance;
@@ -90,47 +93,27 @@ namespace ProjectLightsOut.Gameplay
             // Loop to calculate all bounces
             for (int i = 0; i <= remainingBounces; i++)
             {
-                // To simulate the bullet's width, we cast two rays from edges and pick the closest hit
-                Vector2 rightOffset = new Vector2(-currentDirection.y, currentDirection.x) * bulletRadiusInWorldSpace;
-                Vector3 leftRayOrigin = (Vector3)currentPosition - (Vector3)rightOffset;
-                Vector3 rightRayOrigin = (Vector3)currentPosition + (Vector3)rightOffset;
+                // We use CircleCast with the exact radius of the bullet's rigid collider.
+                // This guarantees the laser mathematically hits exactly what the physical bullet would hit!
+                RaycastHit2D hit = Physics2D.CircleCast(currentPosition, bulletRadiusInWorldSpace, currentDirection, distanceRemaining, effectiveMask);
 
-                RaycastHit2D hitLeft = Physics2D.Raycast(leftRayOrigin, currentDirection, distanceRemaining, effectiveMask);
-                RaycastHit2D hitRight = Physics2D.Raycast(rightRayOrigin, currentDirection, distanceRemaining, effectiveMask);
-
-                // Determine which side hit first
-                RaycastHit2D closestHit = hitLeft;
-                bool hitOccurred = hitLeft.collider != null || hitRight.collider != null;
-
-                if (hitLeft.collider != null && hitRight.collider != null)
+                if (hit.collider != null && hit.distance > 0)
                 {
-                    closestHit = hitLeft.distance < hitRight.distance ? hitLeft : hitRight;
-                }
-                else if (hitRight.collider != null)
-                {
-                    closestHit = hitRight;
-                }
-
-                if (hitOccurred && closestHit.distance > 0)
-                {
-                    // Calculate the TRUE center point of the bounce
-                    // Since we casted from the edges, the hit.point is on the edge of the bullet's width.
-                    // We must shift it back to the true center to prevent the next origin from being inside the wall.
-                    Vector2 trueCenterBouncePoint = closestHit == hitLeft 
-                        ? closestHit.point + rightOffset 
-                        : closestHit.point - rightOffset;
+                    // hit.centroid returns the exact center position of the "circle" at the moment it collided
+                    Vector2 trueCenterBouncePoint = hit.centroid;
 
                     // Add the true center hit point to our renderer
                     points.Add((Vector3)trueCenterBouncePoint);
                     
                     // Deduct distance
-                    distanceRemaining -= closestHit.distance;
+                    distanceRemaining -= hit.distance;
 
                     // Update direction and position for the next bounce iteration
-                    currentDirection = Vector2.Reflect(currentDirection, closestHit.normal);
+                    currentDirection = Vector2.Reflect(currentDirection, hit.normal);
                     
-                    // Push the origin slightly forward along the reflected path AND the normal to ensure we completely escape the wall's collider surface.
-                    currentPosition = trueCenterBouncePoint + currentDirection * 0.05f + closestHit.normal * 0.01f;
+                    // Push the origin slightly outward along the normal to ensure we escape the wall's collider surface.
+                    // This uses the EXACT SAME offset math as Projectile.cs to guarantee synchronized ricochet paths!
+                    currentPosition = trueCenterBouncePoint + hit.normal * 0.05f;
 
                     // If we're out of distance, break entirely
                     if (distanceRemaining <= 0) break;

@@ -108,7 +108,9 @@ namespace ProjectLightsOut.Gameplay
 
         public void TrySpawnWave(List<WaveDataSO> sourceWaves)
         {
-            if (activeWaves.Count <= 1)
+            // Changed from <= 1 to == 0 to cleanly force waves to fully wipe before respawning, 
+            // preventing violent physical grid overlaps!
+            if (activeWaves.Count == 0)
             {
                 isSpawnNeeded = true;
             }
@@ -150,6 +152,8 @@ namespace ProjectLightsOut.Gameplay
             }
             else
             {
+                // Lock the timer instantly so it doesn't fire 60 coroutines violently during the delay!
+                teleportCooldown = 9999f; 
                 StartCoroutine(Teleport(1f));
             }
         }

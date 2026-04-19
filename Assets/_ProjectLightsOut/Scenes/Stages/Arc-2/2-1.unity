@@ -5621,19 +5621,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2686241359147677758, guid: 4e4c7b045d706c341891cf1222c28a18, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.3
+      value: 0.77
       objectReference: {fileID: 0}
     - target: {fileID: 2686241359147677758, guid: 4e4c7b045d706c341891cf1222c28a18, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.88
+      value: 0.88
       objectReference: {fileID: 0}
     - target: {fileID: 2916533018128662741, guid: 4e4c7b045d706c341891cf1222c28a18, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.79
+      value: -1.25
       objectReference: {fileID: 0}
     - target: {fileID: 2916533018128662741, guid: 4e4c7b045d706c341891cf1222c28a18, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.72
+      value: 2.53
       objectReference: {fileID: 0}
     - target: {fileID: 4777450832136711891, guid: 4e4c7b045d706c341891cf1222c28a18, type: 3}
       propertyPath: m_IsActive

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8903073165686644134}
   - component: {fileID: 313773014721836717}
   m_Layer: 3
-  m_Name: 1_Azaleth
+  m_Name: 1_AzalethTheDarkWizard
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

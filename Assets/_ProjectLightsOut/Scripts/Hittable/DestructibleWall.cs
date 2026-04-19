@@ -11,6 +11,9 @@ namespace ProjectLightsOut.Hittable
         [Tooltip("If this collider is a child object (like a Tilemap Collider), drag the Parent building GameObject here so the whole building gets destroyed. If left empty, it destroys itself.")]
         [SerializeField] private GameObject rootObjectToDestroy;
 
+        [Tooltip("If true, the object is physically destroyed on death. If false, it merely hides and becomes intangible, allowing it to be Respawned later.")]
+        [SerializeField] private bool destroyOnDeath = true;
+
         [Header("Health Settings")]
         [Tooltip("How many ricochet hits this wall can take before being destroyed.")]
         [SerializeField] private int maxHealth = 2;
@@ -47,12 +50,12 @@ namespace ProjectLightsOut.Hittable
             // Auto-gather visual components
             GameObject target = rootObjectToDestroy != null ? rootObjectToDestroy : gameObject;
             
-            childSpriteRenderers = target.GetComponentsInChildren<SpriteRenderer>();
+            childSpriteRenderers = target.GetComponentsInChildren<SpriteRenderer>(true);
             originalSpriteColors = new Color[childSpriteRenderers.Length];
             for (int i = 0; i < childSpriteRenderers.Length; i++)
                 originalSpriteColors[i] = childSpriteRenderers[i].color;
 
-            childTilemaps = target.GetComponentsInChildren<Tilemap>();
+            childTilemaps = target.GetComponentsInChildren<Tilemap>(true);
             originalTilemapColors = new Color[childTilemaps.Length];
             for (int i = 0; i < childTilemaps.Length; i++)
                 originalTilemapColors[i] = childTilemaps[i].color;
@@ -95,6 +98,27 @@ namespace ProjectLightsOut.Hittable
             {
                 StopAllCoroutines(); // Reset flash if hit rapidly
                 StartCoroutine(FlashEffectCoroutine());
+            }
+        }
+
+        public void Respawn()
+        {
+            StopAllCoroutines();
+            currentHealth = maxHealth;
+            IsHittable = true;
+
+            // Re-enable colliders
+            Collider2D[] allColliders = GetComponentsInChildren<Collider2D>(true);
+            foreach (Collider2D col in allColliders) col.enabled = true;
+
+            // Snap visuals back
+            for (int i = 0; i < childSpriteRenderers.Length; i++)
+            {
+                if (childSpriteRenderers[i] != null) childSpriteRenderers[i].color = originalSpriteColors[i];
+            }
+            for (int i = 0; i < childTilemaps.Length; i++)
+            {
+                if (childTilemaps[i] != null) childTilemaps[i].color = originalTilemapColors[i];
             }
         }
 
@@ -150,8 +174,11 @@ namespace ProjectLightsOut.Hittable
                 yield return null;
             }
 
-            GameObject targetToDestroy = rootObjectToDestroy != null ? rootObjectToDestroy : gameObject;
-            Destroy(targetToDestroy);
+            if (destroyOnDeath)
+            {
+                GameObject targetToDestroy = rootObjectToDestroy != null ? rootObjectToDestroy : gameObject;
+                Destroy(targetToDestroy);
+            }
         }
     }
 }

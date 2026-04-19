@@ -21,6 +21,9 @@ namespace ProjectLightsOut.Gameplay
         [Header("Combat Settings")]
         [SerializeField] private int damage = 1;
         public int Damage => damage;
+        
+        [Tooltip("Multiplies the initial speed fired by PlayerShoot. Set to 1 for generic bullet, 3 for a high-speed 'Void Piercer' variant!")]
+        [SerializeField] private float customSpeedMultiplier = 1f;
 
         [HideInInspector] public SimplePool ParentPool;
 
@@ -126,7 +129,7 @@ namespace ProjectLightsOut.Gameplay
 
         public void SetDirection(Vector2 direction)
         {
-            this.direction = direction;
+            this.direction = direction * customSpeedMultiplier;
         }
 
         private void OnTriggerEnter2D(Collider2D collider)

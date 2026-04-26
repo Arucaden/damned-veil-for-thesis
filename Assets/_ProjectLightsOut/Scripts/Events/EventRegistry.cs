@@ -106,6 +106,10 @@
 //   Broadcasters: (currently unused — game over is triggered internally)
 //   Listeners:    (none found)
 //
+// OnVoidOrbHitPlayer()
+//   Broadcasters: VoidOrb (on contact with Player-tagged collider)
+//   Listeners:    AwakenedAzalethBoss (triggers instant game-over sequence)
+//
 // OnTriggerLevelComplete()
 //   Broadcasters: WaveManager (all enemies dead), BossDeadPhase
 //   Listeners:    ProjectileTracker

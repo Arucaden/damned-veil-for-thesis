@@ -15,6 +15,7 @@ MonoBehaviour:
   LevelScore: 1000
   Waves:
   - {fileID: 11400000, guid: a67713d59aa8d4d48974e26f1a502f3b, type: 2}
+  - {fileID: 11400000, guid: 3b2e9130d90b49447bac666fe85c6df9, type: 2}
   Bullets: 6
   AceTime: 60
   NextLevelScenes:

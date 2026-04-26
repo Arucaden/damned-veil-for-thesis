@@ -151,4 +151,10 @@ namespace ProjectLightsOut.Managers
             LastEnemyDead = lastEnemyDead;
         }
     }
+
+    /// <summary>
+    /// Fired by a VoidOrb when it makes contact with the player.
+    /// Triggers an instant game over sequence.
+    /// </summary>
+    public class OnVoidOrbHitPlayer : GameEvent { }
 }

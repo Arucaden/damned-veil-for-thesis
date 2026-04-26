@@ -22,6 +22,12 @@ namespace ProjectLightsOut.Gameplay
             set { ricochets = value; }
         }
 
+        private bool isVoidMode = false;
+        public bool IsVoidMode => isVoidMode;
+
+        [Tooltip("The Void Projectile prefab this player permanently owns. Activated by certain boss encounters.")]
+        [SerializeField] private GameObject voidBulletPrefab;
+
         [SerializeField] private GameObject bulletPrefab;
         [SerializeField] private SimplePool bulletPool;
         private CircleCollider2D bulletCollider;
@@ -48,8 +54,6 @@ namespace ProjectLightsOut.Gameplay
         private Coroutine reloadCoroutine;
         private bool wasReloadingWhenPaused = false;
                 
-        //========================
-
         private void Awake()
         {
             bulletCollider = bulletPrefab.GetComponent<CircleCollider2D>();
@@ -83,12 +87,11 @@ namespace ProjectLightsOut.Gameplay
 
             if (reloadCoroutine != null && !IsFiringEnabled)
             {
-                wasReloadingWhenPaused = reloading; // Remember if we were reloading
+                wasReloadingWhenPaused = reloading;
                 StopCoroutine(reloadCoroutine);
             }
             else if (IsFiringEnabled && wasReloadingWhenPaused)
             {
-                // If we were reloading when paused, resume the reload
                 wasReloadingWhenPaused = false;
                 reloadCoroutine = StartCoroutine(ReloadCoroutine(bullets));
             }
@@ -111,7 +114,6 @@ namespace ProjectLightsOut.Gameplay
 
         private void Update()
         {
-            // Aiming and laser drawing is now handled by PlayerLaserAimer.cs
             GetInput();
         }
 
@@ -138,8 +140,6 @@ namespace ProjectLightsOut.Gameplay
             reloading = false;
         }
 
-
-        
         private void GetInput()
         {
             if (Input.GetMouseButtonDown(0))
@@ -150,7 +150,7 @@ namespace ProjectLightsOut.Gameplay
 
         private void Shoot()
         {
-            if (bullets <= 0)
+            if (bullets <= 0 && !isVoidMode)
             {
                 return;
             }
@@ -162,6 +162,29 @@ namespace ProjectLightsOut.Gameplay
             OnShoot?.Invoke();
 
             EventManager.Broadcast(new OnPlaySFX("Cast"));
+
+            if (isVoidMode)
+            {
+                GameObject voidBulletObj = bulletPool != null
+                    ? bulletPool.Get(bulletSpawnPoint.position, bulletSpawnPoint.rotation)
+                    : Instantiate(voidBulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
+
+                Projectile voidProj = voidBulletObj.GetComponent<Projectile>();
+                if (voidProj != null)
+                {
+                    voidProj.ResetProjectile();
+                    voidProj.ParentPool = bulletPool;
+                    voidProj.SetDirection(bulletSpawnPoint.up * bulletSpeed);
+                }
+
+                Bullets--;
+                EventManager.Broadcast(new OnProjectileShoot(bullets));
+
+                if (bullets == 0 && LevelManager.LevelData.IsBossLevel)
+                    EventManager.Broadcast(new OnGrantReload(LevelManager.LevelData.Bullets));
+
+                return;
+            }
 
             GameObject bullet = bulletPool != null
                 ? bulletPool.Get(bulletSpawnPoint.position, bulletSpawnPoint.rotation)
@@ -183,5 +206,16 @@ namespace ProjectLightsOut.Gameplay
                 }
             }
         }
+
+        public void GiveVoidProjectile()
+        {
+            if (voidBulletPrefab == null)
+            {
+                Debug.LogWarning("[PlayerShoot] GiveVoidProjectile called but voidBulletPrefab is not assigned on PlayerShoot!");
+                return;
+            }
+            isVoidMode = true;
+        }
+
     }
 }

@@ -26,6 +26,9 @@ namespace ProjectLightsOut.Gameplay
         [SerializeField] protected SimplePool killEffectPool;
         protected Action OnSpawned;
 
+        protected Color originalColor = Color.white;
+        protected bool originalImmortalState = false;
+
         protected virtual void Awake()
         {
             if (animator == null)
@@ -46,7 +49,27 @@ namespace ProjectLightsOut.Gameplay
 
         protected virtual void Start()
         {
+            if (spriteRenderer != null) originalColor = spriteRenderer.color;
+            originalImmortalState = immortal;
+            
             EventManager.Broadcast(new OnEnemyRegister(this));
+        }
+
+        public void SetWardenShield(bool isShielded, Color? shieldColor = null)
+        {
+            if (isShielded)
+            {
+                immortal = true;
+                if (shieldColor.HasValue && spriteRenderer != null)
+                {
+                    spriteRenderer.color = shieldColor.Value;
+                }
+            }
+            else
+            {
+                immortal = originalImmortalState;
+                if (spriteRenderer != null) spriteRenderer.color = originalColor;
+            }
         }
 
         public virtual void OnHit(int multiplier, Action OnTargetHit)

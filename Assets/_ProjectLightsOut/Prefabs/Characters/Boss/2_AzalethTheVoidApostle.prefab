@@ -102,7 +102,7 @@ GameObject:
   - component: {fileID: 599990321515046129}
   - component: {fileID: 3122479205903740787}
   - component: {fileID: 6550640699778211458}
-  - component: {fileID: 8690092373767509167}
+  - component: {fileID: 409004197502446568}
   m_Layer: 3
   m_Name: 2_AzalethTheVoidApostle
   m_TagString: Enemy
@@ -118,7 +118,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4316091999775144929}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.382, y: 1.165, z: -0.058145072}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -175,7 +175,7 @@ Animator:
   m_GameObject: {fileID: 4316091999775144929}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 872f56cb98eb0414d9422a040bf7a675, type: 2}
+  m_Controller: {fileID: 9100000, guid: c24107b0a877913459ec4840484c99c6, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -187,7 +187,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &8690092373767509167
+--- !u!114 &409004197502446568
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -196,10 +196,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4316091999775144929}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af792ae17d003624f8542ee82c1d453a, type: 3}
+  m_Script: {fileID: 11500000, guid: 1b76c8f14383e5747ace5f06de971e32, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.AzalethBoss
-  health: 50
+  m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.AwakenedAzalethBoss
+  health: 1
   immortal: 0
   score: 1000
   animator: {fileID: 6550640699778211458}
@@ -210,33 +210,37 @@ MonoBehaviour:
   killEffect: {fileID: 4828271000770673910, guid: 1b4a5e15abd3a3a4daea1c8da0b010a0, type: 3}
   spawnEffectPool: {fileID: 0}
   killEffectPool: {fileID: 0}
-  phase1Name: Azaleth The Promised Apostle
-  phase2Name: Azaleth The Promised Apostle
+  phase1Name: Azaleth The Void Apostle
+  phase2Name: Azaleth The Void Apostle
   firstPhaseWaves:
-  - {fileID: 11400000, guid: 524d1300a105fd84996efa7616bd2845, type: 2}
-  - {fileID: 11400000, guid: 2194175203a1ba449ba0f335aafcae82, type: 2}
-  - {fileID: 11400000, guid: b06e9e41404522241b5df791908c856e, type: 2}
-  - {fileID: 11400000, guid: bf39acd7492c99344809b5e665950a14, type: 2}
-  - {fileID: 11400000, guid: 6ba221ff1a9c58f4aa40f372463a4ea7, type: 2}
-  - {fileID: 11400000, guid: b019ff5e60d7d9c41be39bfb81647d4d, type: 2}
+  - {fileID: 11400000, guid: f4f98431c10611345ac5ed0993476ff7, type: 2}
+  - {fileID: 11400000, guid: c7fe99622759e274d814faec992b0112, type: 2}
+  - {fileID: 11400000, guid: 67ac620d512452442889a4957b41dc00, type: 2}
+  - {fileID: 11400000, guid: f24a28688d5cc9d48b805e18cc0da38b, type: 2}
+  - {fileID: 11400000, guid: 307ff5e3a0f44fb4996d29e6397040f9, type: 2}
+  - {fileID: 11400000, guid: 6fd1722b7ac63584d9a39534d6628d15, type: 2}
   secondPhaseWaves:
-  - {fileID: 11400000, guid: 524d1300a105fd84996efa7616bd2845, type: 2}
-  - {fileID: 11400000, guid: 2194175203a1ba449ba0f335aafcae82, type: 2}
-  - {fileID: 11400000, guid: b06e9e41404522241b5df791908c856e, type: 2}
-  - {fileID: 11400000, guid: bf39acd7492c99344809b5e665950a14, type: 2}
-  - {fileID: 11400000, guid: 6ba221ff1a9c58f4aa40f372463a4ea7, type: 2}
-  - {fileID: 11400000, guid: b019ff5e60d7d9c41be39bfb81647d4d, type: 2}
+  - {fileID: 11400000, guid: f4f98431c10611345ac5ed0993476ff7, type: 2}
+  - {fileID: 11400000, guid: c7fe99622759e274d814faec992b0112, type: 2}
+  - {fileID: 11400000, guid: 67ac620d512452442889a4957b41dc00, type: 2}
+  - {fileID: 11400000, guid: f24a28688d5cc9d48b805e18cc0da38b, type: 2}
+  - {fileID: 11400000, guid: 307ff5e3a0f44fb4996d29e6397040f9, type: 2}
+  - {fileID: 11400000, guid: 6fd1722b7ac63584d9a39534d6628d15, type: 2}
   shieldEffect: {fileID: 5303588872635761215}
-  teleportPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  maxSpawnCooldown: 4
+  teleportPoints: []
   teleportCooldownMax: 5
+  maxSpawnCooldown: 4
+  voidOrbPrefab: {fileID: 50413372797159726, guid: 2a214712dbc801945bc8b424e5cff45a, type: 3}
+  voidOrbPool: {fileID: 0}
+  voidOrbSpawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  phase1OrbInterval: 3
+  phase2OrbInterval: 1.5
+  maxActiveOrbs: 5
+  blackoutFadeTime: 2
 --- !u!1 &5891718186701860608
 GameObject:
   m_ObjectHideFlags: 0
@@ -354,8 +358,8 @@ Transform:
   m_GameObject: {fileID: 6133990959763607407}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.058145072}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.022, y: 0.015, z: -0.058145072}
+  m_LocalScale: {x: 0.2450007, y: 0.2440872, z: 0.261}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2936553155177211191}
@@ -410,7 +414,7 @@ SpriteRenderer:
   m_SortingLayer: 5
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1054640884, guid: 802f0778c616cc24583b750838633b69, type: 3}
+  m_Sprite: {fileID: -3759723690445614691, guid: 93075fde004a48c4a988f3c44363356a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

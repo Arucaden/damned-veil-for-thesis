@@ -9,7 +9,9 @@ namespace ProjectLightsOut.Gameplay
     {
         [SerializeField] private Rigidbody2D rb;
         private Vector2 direction;
+        public Vector2 Direction => direction;
         private int ricochetCount;
+        public int RicochetCount => ricochetCount;
         private float destroyTimer = 10f;
         [SerializeField] private int maxRicochetCount = 3;
         public int MaxRicochetCount => maxRicochetCount;
@@ -73,37 +75,25 @@ namespace ProjectLightsOut.Gameplay
 
             if (hit.collider != null && hit.distance > 0)
             {
-                if (hit.collider.CompareTag("Ricochet"))
+                PortalBase portal = hit.collider.GetComponent<PortalBase>();
+
+                if (portal != null)
                 {
-                    destroyTimer = 10f;
-                    EventManager.Broadcast(new OnPlaySFX("WallHit"));
-
-                    // Manually notify solid destructibles (like DestructibleWall) about the hit
-                    // because Kinematic bodies no longer trigger OnCollisionEnter2D
-                    IHittable hittable = hit.collider.GetComponent<IHittable>();
-                    if (hittable != null && hittable.IsHittable) hittable.OnHit(damage, OnTargetHit);
-                    
-                    if (ricochetCount < maxRicochetCount)
+                    if (portal.TryEnterPortal(this, hit.centroid, hit.normal, out Vector2 exitPos, out Vector2 exitDir))
                     {
-                        ricochetCount++;
-                        
-                        // Advance exactly to the mathematical impact centroid
-                        Vector2 impactCenter = hit.centroid;
-                        
-                        direction = Vector2.Reflect(direction, hit.normal);
-                        transform.up = direction;
-
-                        // Offset the remainder using the unified 0.05f constant
-                        rb.MovePosition(impactCenter + hit.normal * 0.05f);
+                        rb.MovePosition(exitPos);
+                        direction = exitDir.normalized * direction.magnitude; // Preserve speed
+                        transform.up = direction.normalized;
                     }
                     else
                     {
-                        DestroyProjectile();
-                        return;
+                        // Portal rejected the bullet (e.g., wrong side). Treat as Ricochet wall.
+                        DoRicochet(hit);
                     }
-
-                    EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
-                    SpawnEffect(hit.point + hit.normal * 0.05f, hit.normal);
+                }
+                else if (hit.collider.CompareTag("Ricochet"))
+                {
+                    DoRicochet(hit);
                 }
                 else if (!hit.collider.isTrigger)
                 {
@@ -125,6 +115,39 @@ namespace ProjectLightsOut.Gameplay
                 // No geometric impact, advance normally
                 rb.MovePosition(currentPos + moveDir * distanceToMove);
             }
+        }
+
+        private void DoRicochet(RaycastHit2D hit)
+        {
+            destroyTimer = 10f;
+            EventManager.Broadcast(new OnPlaySFX("WallHit"));
+
+            // Manually notify solid destructibles (like DestructibleWall) about the hit
+            // because Kinematic bodies no longer trigger OnCollisionEnter2D
+            IHittable hittable = hit.collider.GetComponent<IHittable>();
+            if (hittable != null && hittable.IsHittable) hittable.OnHit(damage, OnTargetHit);
+            
+            if (ricochetCount < maxRicochetCount)
+            {
+                ricochetCount++;
+                
+                // Advance exactly to the mathematical impact centroid
+                Vector2 impactCenter = hit.centroid;
+                
+                direction = Vector2.Reflect(direction, hit.normal);
+                transform.up = direction;
+
+                // Offset the remainder using the unified 0.05f constant
+                rb.MovePosition(impactCenter + hit.normal * 0.05f);
+            }
+            else
+            {
+                DestroyProjectile();
+                return;
+            }
+
+            EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
+            SpawnEffect(hit.point + hit.normal * 0.05f, hit.normal);
         }
 
         public void SetDirection(Vector2 direction)

@@ -20404,16 +20404,94 @@ PrefabInstance:
       propertyPath: m_Name
       value: 2_AzalethTheVoidApostle
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8690092373767509167, guid: c76c23621458b8b4a8046521879150d2, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4316091999775144929, guid: c76c23621458b8b4a8046521879150d2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1500393770}
   m_SourcePrefab: {fileID: 100100000, guid: c76c23621458b8b4a8046521879150d2, type: 3}
 --- !u!4 &1500393763 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 599990321515046129, guid: c76c23621458b8b4a8046521879150d2, type: 3}
   m_PrefabInstance: {fileID: 1500393762}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1500393764 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5303588872635761215, guid: c76c23621458b8b4a8046521879150d2, type: 3}
+  m_PrefabInstance: {fileID: 1500393762}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c7cca82278eabc4d844fb4d76871318, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!212 &1500393765 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8349336007769986824, guid: c76c23621458b8b4a8046521879150d2, type: 3}
+  m_PrefabInstance: {fileID: 1500393762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1500393766 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 689131224429739736, guid: c76c23621458b8b4a8046521879150d2, type: 3}
+  m_PrefabInstance: {fileID: 1500393762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1500393767 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4316091999775144929, guid: c76c23621458b8b4a8046521879150d2, type: 3}
+  m_PrefabInstance: {fileID: 1500393762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1500393768 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 6550640699778211458, guid: c76c23621458b8b4a8046521879150d2, type: 3}
+  m_PrefabInstance: {fileID: 1500393762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!70 &1500393769 stripped
+CapsuleCollider2D:
+  m_CorrespondingSourceObject: {fileID: 3122479205903740787, guid: c76c23621458b8b4a8046521879150d2, type: 3}
+  m_PrefabInstance: {fileID: 1500393762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1500393770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500393767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b76c8f14383e5747ace5f06de971e32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.AwakenedAzalethBoss
+  health: 1
+  immortal: 0
+  score: 1000
+  animator: {fileID: 1500393768}
+  SpawnEffect: {fileID: 7541505187178390245, guid: ff287df4c47027946b37b07793d65d6a, type: 3}
+  col2d: {fileID: 1500393769}
+  spriteRenderer: {fileID: 1500393766}
+  shadowRenderer: {fileID: 1500393765}
+  killEffect: {fileID: 4828271000770673910, guid: 1b4a5e15abd3a3a4daea1c8da0b010a0, type: 3}
+  spawnEffectPool: {fileID: 0}
+  killEffectPool: {fileID: 0}
+  phase1Name: Azaleth The Void Apostle
+  phase2Name: Azaleth The Void Apostle
+  firstPhaseWaves: []
+  secondPhaseWaves: []
+  shieldEffect: {fileID: 1500393764}
+  teleportPoints: []
+  teleportCooldownMax: 5
+  maxSpawnCooldown: 4
+  voidOrbPrefab: {fileID: 0}
+  voidOrbPool: {fileID: 0}
+  voidOrbSpawnPoints: []
+  phase1OrbInterval: 3
+  phase2OrbInterval: 1.5
+  maxActiveOrbs: 5
+  blackoutFadeTime: 2
 --- !u!1 &1503113769
 GameObject:
   m_ObjectHideFlags: 0

@@ -53,6 +53,6 @@ namespace ProjectLightsOut.Managers
     public struct ProceduralEnemyRatio
     {
         public GameObject EnemyPrefab;
-        [Min(1)] public int Ratio; // Relative weight (e.g., 4 basic, 1 special)
+        [Min(1)] public int Ratio;
     }
 }

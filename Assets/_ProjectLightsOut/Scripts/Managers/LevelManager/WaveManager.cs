@@ -7,10 +7,6 @@ using DamnedVeil.ProceduralLogic.Orchestrator;
 
 namespace ProjectLightsOut.Managers
 {
-    /// <summary>
-    /// Manages wave spawning, enemy registration, and wave completion detection.
-    /// Extracted from LevelManager to follow Single Responsibility Principle.
-    /// </summary>
     public class WaveManager : MonoBehaviour
     {
         private List<Enemy> enemies = new List<Enemy>();
@@ -18,6 +14,8 @@ namespace ProjectLightsOut.Managers
 
         private List<Enemy> deadEnemies = new List<Enemy>();
         public List<Enemy> DeadEnemies => deadEnemies;
+
+        [SerializeField] private float waveTransitionDelay = 1.5f;
 
         private int currentWave = 0;
 
@@ -46,28 +44,16 @@ namespace ProjectLightsOut.Managers
             CheckAllEnemiesDead(evt.Enemy);
         }
 
-        /// <summary>
-        /// Called by LevelFlowController after the intro sequence to kick off
-        /// the first wave if all pre-placed enemies are already dead.
-        /// </summary>
         public void TriggerInitialWaveCheck()
         {
             CheckAllEnemiesDead(null);
         }
 
-        /// <summary>
-        /// After all enemies in the current wave are dead, spawn the next wave
-        /// or trigger level completion.
-        /// </summary>
 
         public bool AllWavesDefeated { get; private set; }
 
         public delegate bool WaveLoopCondition();
         
-        /// <summary>
-        /// External riddles can hook into this. If this returns true, the current wave
-        /// will infinitely loop instead of completing combat.
-        /// </summary>
         public WaveLoopCondition ShouldLoopWaves;
 
         private void CheckAllEnemiesDead(Enemy enemyDead)
@@ -77,22 +63,22 @@ namespace ProjectLightsOut.Managers
 
             if (enemies.Count == 0)
             {
+                float delay = currentWave == 0 ? 0f : waveTransitionDelay;
+
                 if (LevelManager.LevelData.Waves.Count > currentWave)
                 {
-                    StartCoroutine(SpawnWave(LevelManager.LevelData.Waves[currentWave]));
+                    StartCoroutine(SpawnWave(LevelManager.LevelData.Waves[currentWave], delay));
                     currentWave++;
                 }
                 else
                 {
-                    // Check if an external system (like PillarsRiddle) is forcing a loop!
                     if (ShouldLoopWaves != null && ShouldLoopWaves.Invoke())
                     {
-                        // Spawn the LAST wave over again!
                         int lastWaveIndex = currentWave - 1;
                         if (lastWaveIndex >= 0)
                         {
-                            StartCoroutine(SpawnWave(LevelManager.LevelData.Waves[lastWaveIndex]));
-                            return; // Stop here, do not finish combat!
+                            StartCoroutine(SpawnWave(LevelManager.LevelData.Waves[lastWaveIndex], delay));
+                            return;
                         }
                     }
 
@@ -102,12 +88,13 @@ namespace ProjectLightsOut.Managers
             }
         }
 
-        /// <summary>
-        /// Spawns a wave of enemies from a WaveDataSO, supporting both
-        /// manual and procedural wave types.
-        /// </summary>
-        public IEnumerator SpawnWave(WaveDataSO waveData)
+        public IEnumerator SpawnWave(WaveDataSO waveData, float initialDelay = 0f)
         {
+            if (initialDelay > 0f)
+            {
+                yield return new WaitForSeconds(initialDelay);
+            }
+
             if (waveData.IsProcedural)
             {
                 if (ProceduralEnemySpawner.Instance != null)
@@ -122,7 +109,6 @@ namespace ProjectLightsOut.Managers
                 {
                     Debug.LogError("[WaveManager] ProceduralEnemySpawner Instance is null! Cannot spawn procedural wave.");
                 }
-                yield break;
             }
 
             foreach (var enemyData in waveData.Enemies)

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37ddf6c4f99bec3489c157007f29a719, type: 3}
+  m_Name: 2-1_wave2
+  m_EditorClassIdentifier: 
+  Enemies: []
+  IsProcedural: 1
+  ProceduralSettings:
+    EnemyCount: 7
+    EnemyRatios:
+    - EnemyPrefab: {fileID: 365808678759055077, guid: 64a71388e1484be439bc0c29722216f2, type: 3}
+      Ratio: 1
+    - EnemyPrefab: {fileID: 365808678759055077, guid: fc0e02cca7cacf9419454ce3118d6142, type: 3}
+      Ratio: 6
+    MaxEnemiesPerSegment: 3
+    MinPathLength: 0.1
+    MaxBounces: 6
+    SafeZoneRadius: 0.5
+    MinEnemySpacing: 0.5
+    EndPathBuffer: 0
+    WallBufferRadius: 0.5

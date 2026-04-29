@@ -9,7 +9,7 @@ namespace ProjectLightsOut.Gameplay
     {
         [Header("Warden Settings")]
         [Tooltip("The color applied to other enemies while they are shielded by this Warden.")]
-        [SerializeField] private Color shieldColor = new Color(0.5f, 0.5f, 1f, 0.5f);
+        [SerializeField] private Color shieldColor = new Color(0.8f, 0.8f, 1f, 0.8f);
         
         private WaveManager waveManager;
         private List<Enemy> shieldedEnemies = new List<Enemy>();
@@ -40,6 +40,14 @@ namespace ProjectLightsOut.Gameplay
             if (health <= 0)
             {
                 RemoveShields();
+                
+#if UNITY_EDITOR || UNITY_STANDALONE
+                var light2D = GetComponentInChildren<UnityEngine.Rendering.Universal.Light2D>();
+                if (light2D != null)
+                {
+                    light2D.enabled = false;
+                }
+#endif
             }
         }
 

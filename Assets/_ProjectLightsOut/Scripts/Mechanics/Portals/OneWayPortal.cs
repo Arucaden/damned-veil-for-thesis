@@ -73,10 +73,6 @@ namespace ProjectLightsOut.Gameplay
             return true;
         }
 
-        public override Vector2 GetExitPosition()
-        {
-            return transform.position;
-        }
 
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()

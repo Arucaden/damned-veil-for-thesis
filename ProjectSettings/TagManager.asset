@@ -49,6 +49,9 @@ TagManager:
   - name: Floor
     uniqueID: 3306955835
     locked: 0
+  - name: Wall
+    uniqueID: 320579965
+    locked: 0
   - name: Struct
     uniqueID: 1077729375
     locked: 0
@@ -60,9 +63,6 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 1918644795
-    locked: 0
-  - name: Wall
-    uniqueID: 320579965
     locked: 0
   - name: Projectile
     uniqueID: 2588721013

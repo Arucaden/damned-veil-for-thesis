@@ -17,7 +17,7 @@ namespace ProjectLightsOut.Managers
 
     public enum WallRole
     {
-        Structural,   // bagian solusi
-        Noise         // pengganggu
+        Structural,
+        Noise
     }
 }

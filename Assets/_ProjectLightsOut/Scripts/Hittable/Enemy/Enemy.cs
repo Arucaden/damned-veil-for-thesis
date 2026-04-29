@@ -27,7 +27,7 @@ namespace ProjectLightsOut.Gameplay
         protected Action OnSpawned;
 
         protected Color originalColor = Color.white;
-        protected bool originalImmortalState = false;
+        protected bool originalIsHittableState = true;
 
         protected virtual void Awake()
         {
@@ -50,7 +50,7 @@ namespace ProjectLightsOut.Gameplay
         protected virtual void Start()
         {
             if (spriteRenderer != null) originalColor = spriteRenderer.color;
-            originalImmortalState = immortal;
+            originalIsHittableState = IsHittable;
             
             EventManager.Broadcast(new OnEnemyRegister(this));
         }
@@ -59,7 +59,7 @@ namespace ProjectLightsOut.Gameplay
         {
             if (isShielded)
             {
-                immortal = true;
+                IsHittable = false;
                 if (shieldColor.HasValue && spriteRenderer != null)
                 {
                     spriteRenderer.color = shieldColor.Value;
@@ -67,7 +67,7 @@ namespace ProjectLightsOut.Gameplay
             }
             else
             {
-                immortal = originalImmortalState;
+                IsHittable = originalIsHittableState;
                 if (spriteRenderer != null) spriteRenderer.color = originalColor;
             }
         }

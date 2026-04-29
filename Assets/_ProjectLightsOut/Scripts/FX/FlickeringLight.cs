@@ -22,7 +22,6 @@ namespace ProjectLightsOut.Gameplay.FX
         private void Awake()
         {
             attachedLight = GetComponent<Light2D>();
-            // Add a random offset so all lights don't flicker in perfect sync
             randomOffset = Random.Range(0f, 100f);
         }
 
@@ -30,10 +29,8 @@ namespace ProjectLightsOut.Gameplay.FX
         {
             if (attachedLight == null) return;
 
-            // Simple perlin noise for smooth, natural flickering
             float noise = Mathf.PerlinNoise(Time.time * flickerSpeed + randomOffset, 0f);
 
-            // Interpolate intensity
             attachedLight.intensity = Mathf.Lerp(minIntensity, maxIntensity, noise);
 
         }

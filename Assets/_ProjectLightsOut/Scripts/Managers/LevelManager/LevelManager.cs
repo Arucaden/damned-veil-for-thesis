@@ -4,11 +4,6 @@ using UnityEngine;
 
 namespace ProjectLightsOut.Managers
 {
-    /// <summary>
-    /// Slim data holder and static accessor for level configuration.
-    /// Wave spawning, projectile tracking, and flow control are handled by
-    /// sibling components: WaveManager, ProjectileTracker, LevelFlowController.
-    /// </summary>
     public class LevelManager : Singleton<LevelManager>
     {
         [SerializeField] private LevelDataSO levelData;
@@ -48,9 +43,6 @@ namespace ProjectLightsOut.Managers
             isPlayerShootEnabled = evt.IsEnabled;
         }
 
-        /// <summary>
-        /// Static convenience method for Boss to trigger wave spawning.
-        /// </summary>
         public static void SpawnEnemyWave(WaveDataSO waveData)
         {
             var waveManager = Instance.transform.parent.GetComponentInChildren<WaveManager>();

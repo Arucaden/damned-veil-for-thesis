@@ -9,10 +9,6 @@ using ProjectLightsOut.Gameplay;
 
 namespace DamnedVeil.ProceduralLogic.Orchestrator
 {
-    /// <summary>
-    /// Level Orchestrator (Module C) - Coordinates path generation and CSP validation
-    /// to spawn enemies that can be eliminated with a single ricochet shot.
-    /// </summary>
     public class ProceduralEnemySpawner : Singleton<ProceduralEnemySpawner>
     {
         [Header("References")]
@@ -38,10 +34,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
         private bool hasSpawned = false;
         private ProceduralWaveSettings lastSettings;
 
-        /// <summary>
-        /// Attempts to spawn enemies using the provided settings.
-        /// </summary>
-        /// <returns>True if successful, false if failed after max attempts</returns>
         public bool SpawnWave(ProceduralWaveSettings settings)
         {
             if (playerTransform == null)
@@ -50,16 +42,14 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                 return false;
             }
 
-            // Use local overrides if provided, don't mutate inspector defaults
             float effectiveMinPathLength = settings.MinPathLength > 0 ? settings.MinPathLength : minPathLength;
             int effectiveMaxBounces = settings.MaxBounces > 0 ? settings.MaxBounces : -1;
 
-            // Safety: clamp path bounces to bullet's ricochet limit to prevent unsolvable levels
             if (bulletPrefab != null && effectiveMaxBounces > 0)
             {
                 effectiveMaxBounces = Mathf.Min(effectiveMaxBounces, bulletPrefab.MaxRicochetCount);
             }
-            lastSettings = settings; // Cache for Respawn
+            lastSettings = settings;
             
             ClearSpawnedEnemies();
 
@@ -70,17 +60,14 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             {
                 attempts++;
 
-                // 1. Specular Path Phase - Generate random path
                 float angle = UnityEngine.Random.Range(0f, 360f);
                 SpecularPathData path = pathGenerator.GeneratePathAtAngle(playerPosition, angle, effectiveMaxBounces);
 
-                // Validate path length
                 if (path.TotalLength < effectiveMinPathLength)
                 {
                     continue;
                 }
 
-                // 2. CSP Phase - Validate and get enemy positions
                 List<EnemySpawnData> enemyPositions = cspValidator.Solve(
                     path,
                     playerPosition,
@@ -94,11 +81,9 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
 
                 if (enemyPositions != null && enemyPositions.Count >= settings.EnemyCount)
                 {
-                    // 3. Spawning Phase - Instantiate enemies
                     SpawnEnemiesAtPositions(enemyPositions, settings.EnemyRatios);
                     currentPath = path;
 
-                    // Visualize the path - ONLY IN EDITOR or if debug enabled
                     if (showPath && pathLineRenderer != null)
                     {
                         DrawPath(path);
@@ -116,9 +101,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             return false;
         }
 
-        /// <summary>
-        /// Spawns enemy prefabs at the validated positions.
-        /// </summary>
         private void SpawnEnemiesAtPositions(List<EnemySpawnData> positions, List<ProceduralEnemyRatio> enemyRatios)
         {
             if (enemyRatios == null || enemyRatios.Count == 0)
@@ -127,30 +109,62 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                 return;
             }
 
-            // Calculate total weight for ratio distribution
             int totalWeight = 0;
             foreach (var ratio in enemyRatios)
             {
                 totalWeight += ratio.Ratio;
             }
 
+            List<GameObject> spawnPool = new List<GameObject>();
+            float[] exactCounts = new float[enemyRatios.Count];
+            int[] intCounts = new int[enemyRatios.Count];
+            int totalSpawned = 0;
+
+            for (int i = 0; i < enemyRatios.Count; i++)
+            {
+                exactCounts[i] = ((float)enemyRatios[i].Ratio / totalWeight) * positions.Count;
+                intCounts[i] = Mathf.FloorToInt(exactCounts[i]);
+                totalSpawned += intCounts[i];
+            }
+
+            int remaining = positions.Count - totalSpawned;
+            for (int r = 0; r < remaining; r++)
+            {
+                float maxFraction = -1f;
+                int maxIndex = 0;
+                for (int i = 0; i < enemyRatios.Count; i++)
+                {
+                    float fraction = exactCounts[i] - intCounts[i];
+                    if (fraction > maxFraction)
+                    {
+                        maxFraction = fraction;
+                        maxIndex = i;
+                    }
+                }
+                intCounts[maxIndex]++;
+                exactCounts[maxIndex] -= 1f;
+            }
+
+            for (int i = 0; i < enemyRatios.Count; i++)
+            {
+                for (int j = 0; j < intCounts[i]; j++)
+                {
+                    spawnPool.Add(enemyRatios[i].EnemyPrefab);
+                }
+            }
+
+            for (int i = 0; i < spawnPool.Count; i++)
+            {
+                int randomIndex = UnityEngine.Random.Range(i, spawnPool.Count);
+                GameObject temp = spawnPool[i];
+                spawnPool[i] = spawnPool[randomIndex];
+                spawnPool[randomIndex] = temp;
+            }
+
             for (int i = 0; i < positions.Count; i++)
             {
                 var spawnData = positions[i];
-                
-                // Weighted Random Selection
-                int randomWeight = UnityEngine.Random.Range(0, totalWeight);
-                GameObject prefab = enemyRatios[0].EnemyPrefab;
-                int currentWeight = 0;
-                foreach (var ratioData in enemyRatios)
-                {
-                    currentWeight += ratioData.Ratio;
-                    if (randomWeight < currentWeight)
-                    {
-                        prefab = ratioData.EnemyPrefab;
-                        break;
-                    }
-                }
+                GameObject prefab = spawnPool[i];
                 
                 GameObject enemyObj = Instantiate(
                     prefab,
@@ -170,9 +184,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             }
         }
 
-        /// <summary>
-        /// Clears all previously spawned enemies.
-        /// </summary>
         public void ClearSpawnedEnemies()
         {
             foreach (var enemy in spawnedEnemies)
@@ -189,9 +200,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             hasSpawned = false;
         }
 
-        /// <summary>
-        /// Draws the current path using the LineRenderer.
-        /// </summary>
         private void DrawPath(SpecularPathData path)
         {
             if (pathLineRenderer == null || path == null)
@@ -214,9 +222,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             pathLineRenderer.enabled = true;
         }
 
-        /// <summary>
-        /// Hides the path visualization.
-        /// </summary>
         public void HidePath()
         {
             if (pathLineRenderer != null)
@@ -225,9 +230,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             }
         }
 
-        /// <summary>
-        /// Re-spawns enemies with a new random configuration.
-        /// </summary>
         public bool Respawn()
         {
             if (lastSettings.EnemyCount > 0)
@@ -237,7 +239,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             return false;
         }
 
-        // Public accessors
         public bool HasSpawned => hasSpawned;
         public int SpawnedEnemyCount => spawnedEnemies.Count;
         public SpecularPathData CurrentPath => currentPath;
@@ -254,7 +255,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            // Draw safe zone around player
             if (playerTransform != null && lastSettings.SafeZoneRadius > 0f)
             {
                 Gizmos.color = new Color(1f, 0f, 0f, 0.2f);

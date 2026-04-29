@@ -7,10 +7,6 @@ using UnityEngine.UI;
 
 namespace ProjectLightsOut.UI
 {
-    /// <summary>
-    /// Boss health bar UI. Works with any boss via the IBoss interface.
-    /// Subscribes to OnBossDamaged/OnBossHealed for health changes.
-    /// </summary>
     public class HUDBossHealthBar : MonoBehaviour
     {
         [SerializeField] private TMPro.TextMeshProUGUI bossNameText;
@@ -123,7 +119,6 @@ namespace ProjectLightsOut.UI
         }
         else
         {
-            // When re-enabling shooting (unpausing), extend the health bar back
             if (boss != null && healthBar.gameObject.activeSelf)
             {
                 StartCoroutine(Extend());

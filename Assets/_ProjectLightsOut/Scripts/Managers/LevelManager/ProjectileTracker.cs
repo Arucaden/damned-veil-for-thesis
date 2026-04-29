@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace ProjectLightsOut.Managers
 {
-    /// <summary>
-    /// Tracks active projectile count and triggers game-over or level-complete
-    /// based on projectile/enemy state. Extracted from LevelManager.
-    /// </summary>
     public class ProjectileTracker : MonoBehaviour
     {
         private int activeProjectiles = 0;
@@ -69,11 +65,11 @@ namespace ProjectLightsOut.Managers
 
                 if (waveManager != null && waveManager.Enemies.Count > 0)
                 {
-                    definitelyStuck = true; // Still enemies alive
+                    definitelyStuck = true;
                 }
                 else if (progressionValidator != null && progressionValidator.HasUnsolvedRiddles())
                 {
-                    definitelyStuck = true; // Stuck staring at a riddle with no ammo
+                    definitelyStuck = true;
                 }
 
                 if (definitelyStuck && !LevelManager.LevelData.IsBossLevel)

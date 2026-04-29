@@ -4,10 +4,6 @@ using DamnedVeil.ProceduralLogic.Models;
 using UnityEngine.Tilemaps;
 namespace DamnedVeil.ProceduralLogic.CSP
 {
-    /// <summary>
-    /// CSP (Constraint Satisfaction Problem) Validator for enemy spawn positions.
-    /// Validates and selects enemy positions along the specular path while respecting constraints.
-    /// </summary>
     public class CSPValidator : MonoBehaviour
     {
         [Header("Sampling Settings")]
@@ -29,10 +25,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
         private List<Vector2> lastSampledPoints = new List<Vector2>();
         private List<Vector2> lastValidPoints = new List<Vector2>();
 
-        /// <summary>
-        /// Validates and selects enemy spawn positions from the given path.
-        /// All constraint values come from WaveDataSO.ProceduralSettings.
-        /// </summary>
         public List<EnemySpawnData> Solve(
             SpecularPathData pathData,
             Vector2 playerPosition,
@@ -50,7 +42,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 return null;
             }
 
-            // Step 1: Sample points along the path
             List<(Vector2 position, int segmentIndex)> sampledPoints = SamplePointsAlongPath(pathData);
             lastSampledPoints.Clear();
             foreach (var p in sampledPoints)
@@ -58,13 +49,11 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 lastSampledPoints.Add(p.position);
             }
 
-            // Step 1.5: Filter by Spawn Area Constraint (Tilemap)
             List<(Vector2 position, int segmentIndex)> areaFiltered = new List<(Vector2, int)>();
             foreach (var point in sampledPoints)
             {
                 if (spawnAreaTilemap != null)
                 {
-                    // Check if there is a tile at the sampled position
                     Vector3Int cellPos = spawnAreaTilemap.WorldToCell(point.position);
                     if (spawnAreaTilemap.HasTile(cellPos))
                     {
@@ -73,7 +62,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 }
                 else
                 {
-                    // If no tilemap is assigned, don't filter
                     areaFiltered.Add(point);
                 }
             }
@@ -84,7 +72,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 return null;
             }
 
-            // Step 2: Filter by Safe Zone constraint (C3)
             List<(Vector2 position, int segmentIndex)> safeZoneFiltered = new List<(Vector2, int)>();
             foreach (var point in areaFiltered)
             {
@@ -101,7 +88,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 return null;
             }
 
-            // Step 3: Filter by end path buffer
             List<(Vector2 position, int segmentIndex)> bufferedPoints = new List<(Vector2, int)>();
             Vector2 pathEnd = pathData.PathPoints[pathData.PathPoints.Count - 1].Position;
             foreach (var point in safeZoneFiltered)
@@ -119,7 +105,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 return null;
             }
 
-            // Step 4: Filter by wall proximity constraint (C5)
             List<(Vector2 position, int segmentIndex)> wallFiltered = new List<(Vector2, int)>();
             foreach (var point in bufferedPoints)
             {
@@ -135,7 +120,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 return null;
             }
 
-            // Step 5: Select random points respecting spacing constraint (C1) and max per segment
             List<EnemySpawnData> selectedEnemies = SelectSpacedPoints(wallFiltered, minEnemySpacing, enemyCount, maxEnemiesPerSegment);
 
             lastValidPoints.Clear();
@@ -144,7 +128,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 lastValidPoints.Add(enemy.Position);
             }
 
-            // Step 6: Validate minimum enemy count (C4)
             if (selectedEnemies.Count < enemyCount)
             {
                 Debug.LogWarning($"[CSPValidator] Could not place enough enemies: {selectedEnemies.Count}/{enemyCount}");
@@ -155,9 +138,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
             return selectedEnemies;
         }
 
-        /// <summary>
-        /// Samples points along the path at the specified resolution.
-        /// </summary>
         private List<(Vector2 position, int segmentIndex)> SamplePointsAlongPath(SpecularPathData pathData)
         {
             List<(Vector2, int)> sampledPoints = new List<(Vector2, int)>();
@@ -179,15 +159,11 @@ namespace DamnedVeil.ProceduralLogic.CSP
             return sampledPoints;
         }
 
-        /// <summary>
-        /// Selects random points from the pool while respecting spacing constraints and segment limits.
-        /// </summary>
         private List<EnemySpawnData> SelectSpacedPoints(List<(Vector2 position, int segmentIndex)> availablePoints, float spacing, int maxCount, int maxPerSegment)
         {
             List<EnemySpawnData> selected = new List<EnemySpawnData>();
             Dictionary<int, int> countsPerSegment = new Dictionary<int, int>();
 
-            // Shuffle the available points for randomness
             List<(Vector2 position, int segmentIndex)> shuffled = new List<(Vector2, int)>(availablePoints);
             ShuffleList(shuffled);
 
@@ -196,14 +172,12 @@ namespace DamnedVeil.ProceduralLogic.CSP
                 if (selected.Count >= maxCount)
                     break;
 
-                // Check Max Segment Count (if limit > 0)
                 if (maxPerSegment > 0)
                 {
                     countsPerSegment.TryGetValue(point.segmentIndex, out int currentCount);
                     if (currentCount >= maxPerSegment) continue;
                 }
 
-                // Check spacing against already selected points
                 bool canPlace = true;
                 foreach (var existing in selected)
                 {
@@ -228,10 +202,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
             return selected;
         }
 
-        /// <summary>
-        /// Checks if a position is too close to any wall collider.
-        /// Uses Physics2D.OverlapCircleAll and checks for the wall tag.
-        /// </summary>
         private bool IsNearWall(Vector2 position, float bufferRadius)
         {
             if (bufferRadius <= 0f) return false;
@@ -247,9 +217,6 @@ namespace DamnedVeil.ProceduralLogic.CSP
             return false;
         }
 
-        /// <summary>
-        /// Fisher-Yates shuffle for randomizing point selection.
-        /// </summary>
         private void ShuffleList<T>(List<T> list)
         {
             for (int i = list.Count - 1; i > 0; i--)
@@ -269,14 +236,12 @@ namespace DamnedVeil.ProceduralLogic.CSP
             if (!showDebugGizmos)
                 return;
 
-            // Draw all sampled points
             Gizmos.color = invalidPointColor;
             foreach (var point in lastSampledPoints)
             {
                 Gizmos.DrawWireSphere(point, 0.1f);
             }
 
-            // Draw valid/selected points
             Gizmos.color = validPointColor;
             foreach (var point in lastValidPoints)
             {

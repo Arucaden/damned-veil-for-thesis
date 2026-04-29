@@ -6,10 +6,6 @@ using ProjectLightsOut.Gameplay;
 
 namespace ProjectLightsOut.Managers
 {
-    /// <summary>
-    /// Acts as the gatekeeper for Level progression.
-    /// Handles deciding when the level actually starts and when it is legally allowed to end.
-    /// </summary>
     public class LevelProgressionValidator : MonoBehaviour
     {
         [SerializeField] private WaveManager waveManager;
@@ -20,7 +16,6 @@ namespace ProjectLightsOut.Managers
 
         private void Awake()
         {
-            // Auto-detect all optional riddles in the level
             activeRiddles = FindObjectsOfType<BaseRiddle>();
         }
 
@@ -40,7 +35,6 @@ namespace ProjectLightsOut.Managers
 
         private void OnPlayerFinishMove(OnPlayerFinishMove evt)
         {
-            // 1. Validator checks start: The player hit the waypoint, safe to start spawning waves.
             if (waveManager != null)
             {
                 waveManager.TriggerInitialWaveCheck();
@@ -78,26 +72,20 @@ namespace ProjectLightsOut.Managers
             CheckForLevelCompletion();
         }
 
-        /// <summary>
-        /// Continually checks the two main validation gates.
-        /// </summary>
         private void CheckForLevelCompletion()
         {
             if (isLevelCompleteTriggered) return;
 
-            // GATE 1: Are all waves exhausted and is the cinematic finished?
             if (waveManager == null || !waveManager.AllWavesDefeated || !isCombatCinematicFinished)
             {
                 return;
             }
 
-            // GATE 2: Are all interactive riddles solved?
             if (HasUnsolvedRiddles())
             {
-                return; // Abort, wait for riddles
+                return;
             }
 
-            // PASS: Both gates cleared. Wait for cinematic to end, then trigger true level completion.
             isLevelCompleteTriggered = true;
             EventManager.Broadcast(new OnTriggerLevelComplete());
         }

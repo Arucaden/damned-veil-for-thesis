@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.9359, y: 0.9359, z: 0.9359}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1553177061935658950}
@@ -77,8 +77,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 320579965
-  m_SortingLayer: 7
+  m_SortingLayerID: 1998389545
+  m_SortingLayer: 9
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1671792523, guid: 36393e544211e284985c4089b2c1ef53, type: 3}
@@ -101,6 +101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1553177061935658950}
   - component: {fileID: 1433773763176526219}
+  - component: {fileID: 4078043363690094858}
   m_Layer: 0
   m_Name: PortalExit
   m_TagString: Untagged
@@ -138,11 +139,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.PortalVisuals
   spriteTransform: {fileID: 6940730851505777516}
-  spinSpeed: 180
-  portalLight: {fileID: 7085029544246159608}
-  minIntensity: 3
-  maxIntensity: 6
-  pulseSpeed: 2
+  spinSpeed: 80
+--- !u!114 &4078043363690094858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4231583869197570802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1d0b3530d7baab478cd5ae1023fd6ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.OneWayPortal
+  linkedPortal: {fileID: 0}
+  exitPoint: {fileID: 0}
+  requiresRicochet: 0
+  dodgeRadius: 0.47
+  waypoints: []
+  speed: 10
+  loop: 1
 --- !u!1 &5587901664740142593
 GameObject:
   m_ObjectHideFlags: 0
@@ -153,6 +169,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3585442299196520566}
   - component: {fileID: 7085029544246159608}
+  - component: {fileID: 2589919069168238108}
   m_Layer: 0
   m_Name: Spot Light 2D
   m_TagString: Untagged
@@ -227,3 +244,19 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
+--- !u!114 &2589919069168238108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5587901664740142593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17e927d87250ef84dba84156d0e415c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.FX.PulsingLight
+  targetLight: {fileID: 0}
+  minIntensity: 1.56
+  maxIntensity: 4.65
+  pulseSpeed: 2

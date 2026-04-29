@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1488043627, guid: 36393e544211e284985c4089b2c1ef53, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.5803922}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.74509805}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -159,11 +159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.PortalVisuals
   spriteTransform: {fileID: 6940730851505777516}
-  spinSpeed: 180
-  portalLight: {fileID: 7085029544246159608}
-  minIntensity: 3
-  maxIntensity: 6
-  pulseSpeed: 2
+  spinSpeed: 80
 --- !u!58 &772609536499304797
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -210,6 +206,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3585442299196520566}
   - component: {fileID: 7085029544246159608}
+  - component: {fileID: 305332059399331489}
   m_Layer: 0
   m_Name: Spot Light 2D
   m_TagString: Untagged
@@ -248,7 +245,7 @@ MonoBehaviour:
   m_LightType: 3
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.326
-  m_Color: {r: 0.07058823, g: 0.45403343, b: 1, a: 1}
+  m_Color: {r: 0.07058823, g: 0.4436688, b: 1, a: 1}
   m_Intensity: 4.65
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
@@ -259,7 +256,7 @@ MonoBehaviour:
   m_AlphaBlendOnOverlap: 0
   m_OverlapOperation: 0
   m_NormalMapDistance: 3
-  m_NormalMapQuality: 2
+  m_NormalMapQuality: 1
   m_UseNormalMap: 0
   m_ShadowsEnabled: 1
   m_ShadowIntensity: 0.75
@@ -284,3 +281,19 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
+--- !u!114 &305332059399331489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5587901664740142593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17e927d87250ef84dba84156d0e415c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::ProjectLightsOut.Gameplay.FX.PulsingLight
+  targetLight: {fileID: 7085029544246159608}
+  minIntensity: 1.58
+  maxIntensity: 4.65
+  pulseSpeed: 2

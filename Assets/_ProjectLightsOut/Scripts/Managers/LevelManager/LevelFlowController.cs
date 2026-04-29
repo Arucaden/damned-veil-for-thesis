@@ -5,10 +5,6 @@ using UnityEngine;
 
 namespace ProjectLightsOut.Managers
 {
-    /// <summary>
-    /// Orchestrates the high-level level lifecycle: start sequence, camera work,
-    /// player movement, and scene transitions. Extracted from LevelManager.
-    /// </summary>
     public class LevelFlowController : MonoBehaviour
     {
         [SerializeField] private List<Transform> startWaypoints = new List<Transform>();

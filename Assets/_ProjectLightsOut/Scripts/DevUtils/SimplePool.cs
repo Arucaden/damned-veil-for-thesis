@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace ProjectLightsOut.DevUtils
 {
-    /// <summary>
-    /// Generic object pool. Attach to a GameObject, assign a prefab, and use
-    /// Get/Return instead of Instantiate/Destroy.
-    /// </summary>
     public class SimplePool : MonoBehaviour
     {
         [SerializeField] private GameObject prefab;
@@ -25,9 +21,6 @@ namespace ProjectLightsOut.DevUtils
             }
         }
 
-        /// <summary>
-        /// Get an object from the pool (or create one if empty).
-        /// </summary>
         public GameObject Get(Vector3 position, Quaternion rotation)
         {
             GameObject obj;
@@ -46,18 +39,12 @@ namespace ProjectLightsOut.DevUtils
             return obj;
         }
 
-        /// <summary>
-        /// Return an object to the pool immediately.
-        /// </summary>
         public void Return(GameObject obj)
         {
             obj.SetActive(false);
             pool.Enqueue(obj);
         }
 
-        /// <summary>
-        /// Return an object to the pool after a delay (ideal for VFX).
-        /// </summary>
         public void Return(GameObject obj, float delay)
         {
             StartCoroutine(DelayedReturn(obj, delay));

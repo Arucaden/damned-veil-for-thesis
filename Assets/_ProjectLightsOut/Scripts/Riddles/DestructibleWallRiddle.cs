@@ -4,9 +4,6 @@ using ProjectLightsOut.Hittable;
 
 namespace ProjectLightsOut.Managers
 {
-    /// <summary>
-    /// A riddle that requires a specific set of DestructibleWalls to be broken.
-    /// </summary>
     public class DestructibleWallRiddle : BaseRiddle
     {
         [Tooltip("The walls that must be destroyed to solve this riddle.")]

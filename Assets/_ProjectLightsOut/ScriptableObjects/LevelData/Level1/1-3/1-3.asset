@@ -16,7 +16,7 @@ MonoBehaviour:
   Waves:
   - {fileID: 11400000, guid: 2dc27d087a65eca40bd3c38cec42f247, type: 2}
   - {fileID: 11400000, guid: c623884cad656b6409fabc7a20523290, type: 2}
-  Bullets: 6
+  Bullets: 5
   AceTime: 60
   NextLevelScenes:
   - 1-4

@@ -6,10 +6,6 @@ using System;
 
 namespace ProjectLightsOut.Riddles
 {
-    /// <summary>
-    /// A puzzle that infinitely loops the enemy spawn waves until all pillars are destroyed IN SEQUENTIAL ORDER!
-    /// The player must destroy all pillars exactly 0 to N, AND clean up the residual enemies to finish combat.
-    /// </summary>
     public class PillarsRiddle : BaseRiddle
     {
         [Tooltip("Drag the 'Pillar' Destructible Walls that must be destroyed here IN THE EXACT ORDER they must be hit! Make sure to set their 'Destroy On Death' to False!")]
@@ -23,7 +19,6 @@ namespace ProjectLightsOut.Riddles
         {
             if (targetPillars.Count == 0)
             {
-                // Auto-complete if no pillars are placed in the inspector
                 CompleteRiddle();
                 return;
             }
@@ -40,7 +35,6 @@ namespace ProjectLightsOut.Riddles
                 }
             }
 
-            // Hook into the WaveManager to force infinite enemy respawns!
             waveManager = FindObjectOfType<WaveManager>();
             if (waveManager != null)
             {
@@ -50,7 +44,6 @@ namespace ProjectLightsOut.Riddles
 
         private bool IsRiddleActive()
         {
-            // If it's NOT solved, we legally demand the WaveManager to loop!
             return !IsSolved;
         }
 
@@ -60,18 +53,15 @@ namespace ProjectLightsOut.Riddles
 
             if (destroyedIndex == currentSequenceIndex)
             {
-                // CORRECT HIT!
                 currentSequenceIndex++;
 
                 if (currentSequenceIndex >= targetPillars.Count)
                 {
-                    //DevUtils.EventManager.Broadcast(new ProjectLightsOut.DevUtils.OnPlaySFX("PuzzleSolved"));
                     CompleteRiddle();
                 }
             }
             else
             {
-                // INCORRECT HIT! Reset the sequence and revive everything!
                 StopAllCoroutines();
                 StartCoroutine(FailSequenceCoroutine());
             }
@@ -79,9 +69,6 @@ namespace ProjectLightsOut.Riddles
 
         private System.Collections.IEnumerator FailSequenceCoroutine()
         {
-            //DevUtils.EventManager.Broadcast(new ProjectLightsOut.DevUtils.OnPlaySFX("ErrorBuzzer")); // Placeholder, add a buzzer sound to your pools!
-            
-            // Wait slightly for the bullet impact and death visuals before snapping everything back
             yield return new WaitForSeconds(0.5f);
 
             currentSequenceIndex = 0;
@@ -108,7 +95,6 @@ namespace ProjectLightsOut.Riddles
                 }
             }
 
-            // Always gracefully unbind from the WaveManager
             if (waveManager != null)
             {
                 waveManager.ShouldLoopWaves -= IsRiddleActive;

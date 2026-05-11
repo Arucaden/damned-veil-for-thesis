@@ -61,7 +61,7 @@ namespace ProjectLightsOut.Managers
 
             while (elapsedTime < duration)
             {
-                elapsedTime += Time.deltaTime;
+                elapsedTime += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsedTime / duration);
                 // Optional: apply smoothstep for a softer transition
                 t = t * t * (3f - 2f * t);

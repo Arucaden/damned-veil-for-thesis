@@ -56,9 +56,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_ProjectLightsOut/Scenes/Stages/Arc-3/3-4.unity
     guid: 766db128f599f1f4ca244780cea64f92
-  - enabled: 1
+  - enabled: 0
     path: Assets/_ProjectLightsOut/Scenes/Stages/Arc-3/TestingStage_Large_10.unity
     guid: 6a675f3130c76e9439a950ad6f46f262
+  - enabled: 1
+    path: Assets/_ProjectLightsOut/Scenes/Stages/Arc-2/Boss_2-2.unity
+    guid: ed48c2fdecfdeb242a20bfc0202db506
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
   m_UseUCBPForAssetBundles: 0

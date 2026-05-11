@@ -33,6 +33,7 @@ namespace ProjectLightsOut.Managers
 
         private void Start()
         {
+            Time.timeScale = 1f;
             Cursor.visible = false;
 
             if (!AudioManager.IsBGMPlaying)

@@ -20,6 +20,10 @@ namespace ProjectLightsOut.Gameplay
         [Header("Boss Identity")]
         [SerializeField] private string phase1Name = "Azaleth";
         [SerializeField] private string phase2Name = "Azaleth, The Awakened";
+        
+        [Header("Intro Settings")]
+        [Tooltip("If true, skips the spotting/zoom intro sequence when this boss spawns.")]
+        [SerializeField] private bool skipEntranceSequence = false;
 
         public string CurrentName => Health <= MaxHealth / 2 ? phase2Name : phase1Name;
 
@@ -91,6 +95,14 @@ namespace ProjectLightsOut.Gameplay
 
         private IEnumerator ReadyBossSequence()
         {
+            if (skipEntranceSequence)
+            {
+                EventManager.Broadcast(new OnBossReady(this));
+                yield return OnEntranceComplete();
+                EventManager.Broadcast(new OnPlayerEnableShooting(true));
+                yield break;
+            }
+
             EventManager.Broadcast(new OnSpotting(transform, 2f));
             yield return new WaitForSeconds(3f);
 

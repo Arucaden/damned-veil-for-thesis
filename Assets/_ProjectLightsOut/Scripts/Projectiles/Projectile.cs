@@ -1,6 +1,7 @@
 using System;
 using ProjectLightsOut.DevUtils;
 using ProjectLightsOut.Managers;
+using ProjectLightsOut.Hittable;
 using UnityEngine;
 
 namespace ProjectLightsOut.Gameplay
@@ -28,11 +29,7 @@ namespace ProjectLightsOut.Gameplay
         [SerializeField] private float customSpeedMultiplier = 1f;
 
         [HideInInspector] public SimplePool ParentPool;
-
-        // Freeze state (used by Kronos time field)
-        private bool isFrozen;
-        private Vector2 frozenDirection;
-        public bool IsFrozen => isFrozen;
+        public bool IsEnemyProjectile { get; set; } = false;
 
         private float bulletRadius = 0.1f;
         private LayerMask collisionMask;
@@ -44,36 +41,53 @@ namespace ProjectLightsOut.Gameplay
                 Debug.LogError($"{name}: Rigidbody2D is not assigned!");
             }
             
-            // Switch to Kinematic to bypass black-box physics resolving that causes stuttering/sticking
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
             CircleCollider2D col = GetComponent<CircleCollider2D>();
             if (col != null) bulletRadius = col.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y);
 
-            collisionMask = ~(1 << LayerMask.NameToLayer("Ignore Laser") | 1 << LayerMask.NameToLayer("Projectile"));
+            collisionMask = ~(1 << LayerMask.NameToLayer("Ignore Laser"));
 
             OnTargetHit = () => { maxRicochetCount++; };
         }
 
+        private RaycastHit2D[] hitResults = new RaycastHit2D[16];
+
         private void Update()
         {
-            if (!isFrozen)
-                SelfDestruct();
+            SelfDestruct();
         }
 
         private void FixedUpdate()
         {
-            if (isFrozen || direction.sqrMagnitude == 0) return;
+            if (direction.sqrMagnitude == 0) return;
 
             float distanceToMove = direction.magnitude * Time.fixedDeltaTime;
             Vector2 currentPos = rb.position;
             Vector2 moveDir = direction.normalized;
 
-            // Execute the exact same mathematical sweep the Laser Aimer uses
-            RaycastHit2D hit = Physics2D.CircleCast(currentPos, bulletRadius, moveDir, distanceToMove, collisionMask);
+            int hitCount = Physics2D.CircleCastNonAlloc(currentPos, bulletRadius, moveDir, hitResults, distanceToMove, collisionMask);
+            
+            RaycastHit2D hit = default;
+            float minDistance = float.MaxValue;
+            bool hitFound = false;
 
-            if (hit.collider != null && hit.distance > 0)
+            for (int i = 0; i < hitCount; i++)
+            {
+                var h = hitResults[i];
+                if (h.collider != null && h.collider.gameObject != this.gameObject)
+                {
+                    if (h.distance < minDistance)
+                    {
+                        minDistance = h.distance;
+                        hit = h;
+                        hitFound = true;
+                    }
+                }
+            }
+
+            if (hitFound)
             {
                 PortalBase portal = hit.collider.GetComponent<PortalBase>();
 
@@ -82,14 +96,26 @@ namespace ProjectLightsOut.Gameplay
                     if (portal.TryEnterPortal(this, hit.centroid, hit.normal, out Vector2 exitPos, out Vector2 exitDir))
                     {
                         rb.MovePosition(exitPos);
-                        direction = exitDir.normalized * direction.magnitude; // Preserve speed
+                        direction = exitDir.normalized * direction.magnitude;
                         transform.up = direction.normalized;
                     }
                     else
                     {
-                        // Portal rejected the bullet (e.g., wrong side). Treat as Ricochet wall.
                         DoRicochet(hit);
                     }
+                }
+                else if (hit.collider.TryGetComponent<Projectile>(out var otherProjectile) && otherProjectile.IsEnemyProjectile != this.IsEnemyProjectile)
+                {
+                    Vector2 impactNormal = hit.normal;
+                    if (impactNormal == Vector2.zero) 
+                    {
+                        impactNormal = (currentPos - (Vector2)otherProjectile.transform.position).normalized;
+                        if (impactNormal == Vector2.zero) impactNormal = Vector2.up;
+                    }
+
+                    otherProjectile.ForceClash(-impactNormal, hit.point);
+                    hit.normal = impactNormal;
+                    ForceClash(impactNormal, hit.point);
                 }
                 else if (hit.collider.CompareTag("Ricochet"))
                 {
@@ -97,22 +123,23 @@ namespace ProjectLightsOut.Gameplay
                 }
                 else if (!hit.collider.isTrigger)
                 {
-                    // Solid wall without ricochet capabilities
                     IHittable hittable = hit.collider.GetComponent<IHittable>();
-                    if (hittable != null && hittable.IsHittable) hittable.OnHit(damage, OnTargetHit);
+                    if (hittable != null && hittable.IsHittable)
+                    {
+                        if (hittable is DestructibleWall wall) wall.TakeDamageFromProjectile(damage, IsEnemyProjectile);
+                        else hittable.OnHit(damage, OnTargetHit);
+                    }
 
                     SpawnEffect(hit.point + hit.normal * 0.05f, hit.normal);
                     DestroyProjectile();
                 }
                 else 
                 {
-                    // Hit a purely visual/trigger collider (like an enemy), ignore the wall collision and proceed
                     rb.MovePosition(currentPos + moveDir * distanceToMove);
                 }
             }
             else
             {
-                // No geometric impact, advance normally
                 rb.MovePosition(currentPos + moveDir * distanceToMove);
             }
         }
@@ -122,22 +149,22 @@ namespace ProjectLightsOut.Gameplay
             destroyTimer = 10f;
             EventManager.Broadcast(new OnPlaySFX("WallHit"));
 
-            // Manually notify solid destructibles (like DestructibleWall) about the hit
-            // because Kinematic bodies no longer trigger OnCollisionEnter2D
             IHittable hittable = hit.collider.GetComponent<IHittable>();
-            if (hittable != null && hittable.IsHittable) hittable.OnHit(damage, OnTargetHit);
+            if (hittable != null && hittable.IsHittable)
+            {
+                if (hittable is DestructibleWall wall) wall.TakeDamageFromProjectile(damage, IsEnemyProjectile);
+                else hittable.OnHit(damage, OnTargetHit);
+            }
             
             if (ricochetCount < maxRicochetCount)
             {
                 ricochetCount++;
                 
-                // Advance exactly to the mathematical impact centroid
                 Vector2 impactCenter = hit.centroid;
                 
                 direction = Vector2.Reflect(direction, hit.normal);
                 transform.up = direction;
 
-                // Offset the remainder using the unified 0.05f constant
                 rb.MovePosition(impactCenter + hit.normal * 0.05f);
             }
             else
@@ -155,6 +182,48 @@ namespace ProjectLightsOut.Gameplay
             this.direction = direction * customSpeedMultiplier;
         }
 
+        public void ForceRicochet(Vector2 normal, Vector2 impactPoint)
+        {
+            if (ricochetCount >= maxRicochetCount)
+            {
+                DestroyProjectile();
+                return;
+            }
+
+            destroyTimer = 10f;
+            EventManager.Broadcast(new OnPlaySFX("WallHit"));
+            
+            ricochetCount++;
+            
+            direction = Vector2.Reflect(direction, normal);
+            if (direction != Vector2.zero)
+            {
+                transform.up = direction.normalized;
+            }
+
+            rb.MovePosition(rb.position + normal * 0.05f);
+
+            EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
+            SpawnEffect(impactPoint + normal * 0.05f, normal);
+        }
+
+        public void ForceClash(Vector2 normal, Vector2 impactPoint)
+        {
+            destroyTimer = 10f;
+            EventManager.Broadcast(new OnPlaySFX("WallHit"));
+
+            direction = Vector2.Reflect(direction, normal);
+            if (direction != Vector2.zero)
+            {
+                transform.up = direction.normalized;
+            }
+
+            rb.MovePosition(rb.position + normal * 0.05f);
+
+            EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
+            SpawnEffect(impactPoint + normal * 0.05f, normal);
+        }
+
         private void OnTriggerEnter2D(Collider2D collider)
         {
             CheckTargetTrigger(collider);
@@ -166,13 +235,22 @@ namespace ProjectLightsOut.Gameplay
 
             if (hittable != null && hittable.IsHittable)
             {
-                targetHit++;
-                EventManager.Broadcast(new OnPlaySFX("EnemyHit"));
-                EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
-                EventManager.Broadcast(new OnSlowTime(0.1f, 0.2f));
-                hittable.OnHit(targetHit, OnTargetHit);
+                if (hittable is DestructibleWall wall)
+                {
+                    wall.TakeDamageFromProjectile(damage, IsEnemyProjectile);
+                }
+                else
+                {
+                    if (IsEnemyProjectile) return;
 
-                SpawnHitEffect(collider.transform.position, collider.transform.up);
+                    targetHit++;
+                    EventManager.Broadcast(new OnPlaySFX("EnemyHit"));
+                    EventManager.Broadcast(new OnCameraShake(0.1f, 0.05f));
+                    EventManager.Broadcast(new OnSlowTime(0.1f, 0.2f));
+                    hittable.OnHit(targetHit, OnTargetHit);
+
+                    SpawnHitEffect(collider.transform.position, collider.transform.up);
+                }
             }
         }
 
@@ -208,27 +286,7 @@ namespace ProjectLightsOut.Gameplay
             destroyTimer = 10f;
             direction = Vector2.zero;
             rb.linearVelocity = Vector2.zero;
-            isFrozen = false;
-            frozenDirection = Vector2.zero;
-        }
-
-        // --- Freeze API (for Kronos time field) ---
-
-        public void Freeze()
-        {
-            if (isFrozen) return;
-            isFrozen = true;
-            frozenDirection = direction;
-            direction = Vector2.zero;
-            rb.linearVelocity = Vector2.zero;
-        }
-
-        public void Unfreeze()
-        {
-            if (!isFrozen) return;
-            isFrozen = false;
-            direction = frozenDirection;
-            frozenDirection = Vector2.zero;
+            IsEnemyProjectile = false;
         }
 
         private void SpawnEffect(Vector2 position, Vector2 normal)

@@ -63,32 +63,43 @@ namespace ProjectLightsOut.Hittable
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            // Wall checks the collision
             Projectile proj = collision.gameObject.GetComponent<Projectile>();
             if (proj != null)
             {
-                // Bullet determines the damage
-                TakeDamage(proj.Damage);
+                if (proj.IsEnemyProjectile) return;
+
+                TakeDamageFromProjectile(proj.Damage, proj.IsEnemyProjectile);
             }
         }
 
         public event Action OnWallDestroyed;
+        public event Action<bool> OnWallDestroyedBy;
+        public event Action<bool> OnWallHitByEnemy;
 
         private void TakeDamage(int damage)
         {
-            if (currentHealth <= 0) return; // Prevent double trigger
+            TakeDamageFromProjectile(damage, false);
+        }
+
+        public void TakeDamageFromProjectile(int damage, bool isEnemyProjectile)
+        {
+            if (isEnemyProjectile)
+            {
+                OnWallHitByEnemy?.Invoke(true);
+                return;
+            }
+            if (currentHealth <= 0) return;
 
             currentHealth -= damage;
 
             if (currentHealth <= 0)
             {
+                OnWallDestroyedBy?.Invoke(isEnemyProjectile);
                 OnWallDestroyed?.Invoke();
                 
-                // Disable colliders immediately to prevent Projectile from getting stuck in OnCollisionStay2D!
                 Collider2D[] allColliders = GetComponentsInChildren<Collider2D>();
                 foreach (Collider2D col in allColliders) col.enabled = false;
 
-                // Stop visuals and destroy
                 IsHittable = false;
                 StopAllCoroutines();
                 
@@ -96,7 +107,7 @@ namespace ProjectLightsOut.Hittable
             }
             else
             {
-                StopAllCoroutines(); // Reset flash if hit rapidly
+                StopAllCoroutines();
                 StartCoroutine(FlashEffectCoroutine());
             }
         }
@@ -107,11 +118,9 @@ namespace ProjectLightsOut.Hittable
             currentHealth = maxHealth;
             IsHittable = true;
 
-            // Re-enable colliders
             Collider2D[] allColliders = GetComponentsInChildren<Collider2D>(true);
             foreach (Collider2D col in allColliders) col.enabled = true;
 
-            // Snap visuals back
             for (int i = 0; i < childSpriteRenderers.Length; i++)
             {
                 if (childSpriteRenderers[i] != null) childSpriteRenderers[i].color = originalSpriteColors[i];
@@ -124,13 +133,11 @@ namespace ProjectLightsOut.Hittable
 
         private IEnumerator FlashEffectCoroutine()
         {
-            // Apply flash color
             foreach (var sr in childSpriteRenderers) { if (sr != null) sr.color = flashColor; }
             foreach (var tm in childTilemaps) { if (tm != null) tm.color = flashColor; }
 
             yield return new WaitForSeconds(flashDuration);
 
-            // Restore original colors
             for (int i = 0; i < childSpriteRenderers.Length; i++)
             {
                 if (childSpriteRenderers[i] != null) childSpriteRenderers[i].color = originalSpriteColors[i];
@@ -149,7 +156,6 @@ namespace ProjectLightsOut.Hittable
             {
                 elapsedTime += Time.deltaTime;
                 float progress = elapsedTime / fadeOutDuration;
-                // Lerp alpha from whatever the original color's alpha was to 0
                 
                 for (int i = 0; i < childSpriteRenderers.Length; i++)
                 {

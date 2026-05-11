@@ -36,11 +36,17 @@ namespace ProjectLightsOut.Managers
 
         private void OnTriggerLevelComplete(OnTriggerLevelComplete evt)
         {
+            Debug.Log($"[ProjectileTracker] OnTriggerLevelComplete received. isGameOver={isGameOver}, activeProjectiles={activeProjectiles}");
             isLevelComplete = true;
 
             if (activeProjectiles == 0)
             {
+                Debug.Log("[ProjectileTracker] activeProjectiles=0, starting LevelComplete coroutine.");
                 StartCoroutine(LevelComplete());
+            }
+            else
+            {
+                Debug.Log($"[ProjectileTracker] Waiting for {activeProjectiles} projectile(s) to be destroyed before LevelComplete.");
             }
         }
 
@@ -53,9 +59,11 @@ namespace ProjectLightsOut.Managers
         private void OnProjectileDestroy(OnProjectileDestroy evt)
         {
             activeProjectiles--;
+            Debug.Log($"[ProjectileTracker] Projectile destroyed. activeProjectiles={activeProjectiles}, isLevelComplete={isLevelComplete}");
 
             if (activeProjectiles == 0 && isLevelComplete)
             {
+                Debug.Log("[ProjectileTracker] All projectiles gone + level complete flag set. Starting LevelComplete.");
                 StartCoroutine(LevelComplete());
             }
 
@@ -82,6 +90,7 @@ namespace ProjectLightsOut.Managers
 
         private IEnumerator GameOver()
         {
+            Debug.Log("[ProjectileTracker] GameOver triggered!");
             isGameOver = true;
             EventManager.Broadcast(new OnPlayBGM("GameOver", fadeIn: 1f));
             yield return new WaitForSeconds(1f);
@@ -92,14 +101,17 @@ namespace ProjectLightsOut.Managers
 
         private IEnumerator LevelComplete()
         {
-            if (isGameOver) yield break;
+            Debug.Log($"[ProjectileTracker] LevelComplete started. isGameOver={isGameOver}, flowController={(flowController == null ? "NULL" : flowController.name)}");
+            if (isGameOver) { Debug.LogWarning("[ProjectileTracker] isGameOver=true, aborting LevelComplete."); yield break; }
             yield return new WaitForSeconds(1f);
 
+            Debug.Log("[ProjectileTracker] Disabling player shooting.");
             EventManager.Broadcast(new OnPlayerEnableShooting(false));
 
             yield return new WaitForSeconds(2f);
 
-            if (flowController == null) yield break;
+            if (flowController == null) { Debug.LogError("[ProjectileTracker] flowController is NULL! Cannot move player or fire OnLevelComplete. Assign it in the Inspector."); yield break; }
+            Debug.Log("[ProjectileTracker] Moving player to end waypoints and firing OnLevelComplete.");
             EventManager.Broadcast(new OnPlayerMove(true, flowController.EndWaypoints));
 
             float timeElapsed = flowController.TimeElapsed;

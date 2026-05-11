@@ -114,7 +114,7 @@ namespace ProjectLightsOut.DevUtils
             float timeElapsed = 0f;
             while (timeElapsed < duration)
             {
-                timeElapsed += Time.deltaTime;
+                timeElapsed += Time.unscaledDeltaTime;
                 _fadeCanvasGroup.alpha = Mathf.Clamp01(timeElapsed / duration);
                 await Task.Yield();
             }
@@ -134,7 +134,7 @@ namespace ProjectLightsOut.DevUtils
             float timeElapsed = 0f;
             while (timeElapsed < duration)
             {
-                timeElapsed += Time.deltaTime;
+                timeElapsed += Time.unscaledDeltaTime;
                 _fadeCanvasGroup.alpha = 1 - Mathf.Clamp01(timeElapsed / duration);
                 await Task.Yield();
             }

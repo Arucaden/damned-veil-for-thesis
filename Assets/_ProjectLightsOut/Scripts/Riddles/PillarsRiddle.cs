@@ -8,12 +8,14 @@ namespace ProjectLightsOut.Riddles
 {
     public class PillarsRiddle : BaseRiddle
     {
+        public event Action OnSequenceFailed;
+
         [Tooltip("Drag the 'Pillar' Destructible Walls that must be destroyed here IN THE EXACT ORDER they must be hit! Make sure to set their 'Destroy On Death' to False!")]
         [SerializeField] private List<DestructibleWall> targetPillars = new List<DestructibleWall>();
 
         private int currentSequenceIndex = 0;
         private WaveManager waveManager;
-        private Action[] pillarDelegates;
+        private Action<bool>[] pillarDelegates;
 
         private void Start()
         {
@@ -23,15 +25,16 @@ namespace ProjectLightsOut.Riddles
                 return;
             }
 
-            pillarDelegates = new Action[targetPillars.Count];
+            pillarDelegates = new Action<bool>[targetPillars.Count];
 
             for (int i = 0; i < targetPillars.Count; i++)
             {
                 if (targetPillars[i] != null)
                 {
                     int index = i;
-                    pillarDelegates[i] = () => HandlePillarDestroyed(index);
-                    targetPillars[i].OnWallDestroyed += pillarDelegates[i];
+                    pillarDelegates[i] = (isEnemy) => HandlePillarDestroyed(index, isEnemy);
+                    targetPillars[i].OnWallDestroyedBy += pillarDelegates[i];
+                    targetPillars[i].OnWallHitByEnemy += pillarDelegates[i];
                 }
             }
 
@@ -47,11 +50,11 @@ namespace ProjectLightsOut.Riddles
             return !IsSolved;
         }
 
-        private void HandlePillarDestroyed(int destroyedIndex)
+        private void HandlePillarDestroyed(int destroyedIndex, bool isEnemyProjectile)
         {
             if (IsSolved) return;
 
-            if (destroyedIndex == currentSequenceIndex)
+            if (!isEnemyProjectile && destroyedIndex == currentSequenceIndex)
             {
                 currentSequenceIndex++;
 
@@ -62,6 +65,7 @@ namespace ProjectLightsOut.Riddles
             }
             else
             {
+                OnSequenceFailed?.Invoke();
                 StopAllCoroutines();
                 StartCoroutine(FailSequenceCoroutine());
             }
@@ -82,6 +86,13 @@ namespace ProjectLightsOut.Riddles
             }
         }
 
+        public void ForceReset()
+        {
+            IsSolved = false;
+            StopAllCoroutines();
+            StartCoroutine(FailSequenceCoroutine());
+        }
+
         private void OnDestroy()
         {
             if (pillarDelegates != null)
@@ -90,7 +101,8 @@ namespace ProjectLightsOut.Riddles
                 {
                     if (targetPillars[i] != null && pillarDelegates[i] != null)
                     {
-                        targetPillars[i].OnWallDestroyed -= pillarDelegates[i];
+                        targetPillars[i].OnWallDestroyedBy -= pillarDelegates[i];
+                        targetPillars[i].OnWallHitByEnemy -= pillarDelegates[i];
                     }
                 }
             }

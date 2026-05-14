@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SDebug = System.Diagnostics;
 using UnityEngine;
 using DamnedVeil.ProceduralLogic.Models;
 using DamnedVeil.ProceduralLogic.PathGeneration;
@@ -34,6 +35,12 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
         private bool hasSpawned = false;
         private ProceduralWaveSettings lastSettings;
 
+        // Debug data
+        private int lastAttemptCount = 0;
+        private double generationTimeMs = 0;
+        private double spTimeMs = 0;
+        private double cspTimeMs = 0;
+
         public bool SpawnWave(ProceduralWaveSettings settings)
         {
             if (playerTransform == null)
@@ -56,18 +63,27 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             Vector2 playerPosition = playerTransform.position;
             int attempts = 0;
 
+            var totalWatch = SDebug.Stopwatch.StartNew();
+            double accSpTime = 0;
+            double accCspTime = 0;
+
             while (attempts < maxAttempts)
             {
                 attempts++;
 
                 float angle = UnityEngine.Random.Range(0f, 360f);
+
+                var spWatch = SDebug.Stopwatch.StartNew();
                 SpecularPathData path = pathGenerator.GeneratePathAtAngle(playerPosition, angle, effectiveMaxBounces);
+                spWatch.Stop();
+                accSpTime += spWatch.Elapsed.TotalMilliseconds;
 
                 if (path.TotalLength < effectiveMinPathLength)
                 {
                     continue;
                 }
 
+                var cspWatch = SDebug.Stopwatch.StartNew();
                 List<EnemySpawnData> enemyPositions = cspValidator.Solve(
                     path,
                     playerPosition,
@@ -78,6 +94,8 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                     settings.WallBufferRadius,
                     settings.MaxEnemiesPerSegment
                 );
+                cspWatch.Stop();
+                accCspTime += cspWatch.Elapsed.TotalMilliseconds;
 
                 if (enemyPositions != null && enemyPositions.Count >= settings.EnemyCount)
                 {
@@ -89,15 +107,27 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                         DrawPath(path);
                     }
 
+                    totalWatch.Stop();
+                    lastAttemptCount = attempts;
+                    generationTimeMs = totalWatch.Elapsed.TotalMilliseconds;
+                    spTimeMs = accSpTime;
+                    cspTimeMs = accCspTime;
+
                     if (logDebugInfo)
-                        Debug.Log($"[ProceduralEnemySpawner] Success after {attempts} attempts! Spawned {enemyPositions.Count} enemies.");
+                        UnityEngine.Debug.Log($"[ProceduralEnemySpawner] Success after {attempts} attempts! Spawned {enemyPositions.Count} enemies. Total: {generationTimeMs:F2}ms SP: {spTimeMs:F2}ms CSP: {cspTimeMs:F2}ms");
 
                     hasSpawned = true;
                     return true;
                 }
             }
 
-            Debug.LogWarning($"[ProceduralEnemySpawner] Failed to generate valid level after {maxAttempts} attempts!");
+            totalWatch.Stop();
+            lastAttemptCount = attempts;
+            generationTimeMs = totalWatch.Elapsed.TotalMilliseconds;
+            spTimeMs = accSpTime;
+            cspTimeMs = accCspTime;
+
+            UnityEngine.Debug.LogWarning($"[ProceduralEnemySpawner] Failed to generate valid level after {maxAttempts} attempts!");
             return false;
         }
 
@@ -243,6 +273,14 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
         public int SpawnedEnemyCount => spawnedEnemies.Count;
         public SpecularPathData CurrentPath => currentPath;
         public List<GameObject> SpawnedEnemies => new List<GameObject>(spawnedEnemies);
+
+        // Debug properties
+        public int LastAttemptCount => lastAttemptCount;
+        public int MaxAttempts => maxAttempts;
+        public double GenerationTimeMs => generationTimeMs;
+        public double SpTimeMs => spTimeMs;
+        public double CspTimeMs => cspTimeMs;
+        public ProceduralWaveSettings LastSettings => lastSettings;
 
         private void OnValidate()
         {

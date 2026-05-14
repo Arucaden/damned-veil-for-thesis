@@ -153,4 +153,14 @@ namespace ProjectLightsOut.Managers
     }
 
     public class OnVoidOrbHitPlayer : GameEvent { }
+
+    public class OnShowTutorial : GameEvent
+    {
+        public List<Sprite> Pages;
+
+        public OnShowTutorial(List<Sprite> pages)
+        {
+            Pages = pages;
+        }
+    }
 }

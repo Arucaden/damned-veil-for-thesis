@@ -12,5 +12,6 @@ namespace ProjectLightsOut.Managers
         public float AceTime = 60f;
         public List<string> NextLevelScenes;
         public bool IsBossLevel;
+        public List<Sprite> TutorialPages;
     }
 }

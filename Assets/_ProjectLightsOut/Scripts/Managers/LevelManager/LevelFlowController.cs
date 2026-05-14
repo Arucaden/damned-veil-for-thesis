@@ -98,6 +98,17 @@ namespace ProjectLightsOut.Managers
                 yield break;
             }
 
+            if (LevelManager.LevelData.TutorialPages != null && LevelManager.LevelData.TutorialPages.Count > 0)
+            {
+                EventManager.Broadcast(new OnChangeGameState(GameState.Tutorial));
+                EventManager.Broadcast(new OnShowTutorial(LevelManager.LevelData.TutorialPages));
+                
+                while (GameManager.Instance.CurrentGameState == GameState.Tutorial)
+                {
+                    yield return null;
+                }
+            }
+
             yield return new WaitForSeconds(0.5f);
             EventManager.Broadcast(new OnSpottingEnd());
             EventManager.Broadcast(new OnZoomEnd(1f));

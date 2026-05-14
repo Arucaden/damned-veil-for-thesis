@@ -9,13 +9,15 @@ namespace ProjectLightsOut.Managers
     {
         Playing,
         Paused,
-        GameOver
+        GameOver,
+        Tutorial
     }
 
     public class GameManager : Singleton<GameManager>
     {
         private Coroutine resetTimeScaleCoroutine;
         private GameState gameState = GameState.Playing;
+        public GameState CurrentGameState => gameState;
         private bool isPaused = false;
 
         protected override void Awake()
@@ -76,6 +78,10 @@ namespace ProjectLightsOut.Managers
                     Cursor.visible = true;
                     break;
                 case GameState.Paused:
+                    break;
+                case GameState.Tutorial:
+                    Time.timeScale = 0f;
+                    Cursor.visible = true;
                     break;
             }
 

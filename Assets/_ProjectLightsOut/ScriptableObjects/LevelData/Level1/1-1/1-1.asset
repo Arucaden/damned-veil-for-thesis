@@ -21,3 +21,6 @@ MonoBehaviour:
   NextLevelScenes:
   - 1-2
   IsBossLevel: 0
+  TutorialPages:
+  - Image: {fileID: 869433087, guid: dee2202efbfb0b0488b29101e7fce732, type: 3}
+    Text: kontolatos chco

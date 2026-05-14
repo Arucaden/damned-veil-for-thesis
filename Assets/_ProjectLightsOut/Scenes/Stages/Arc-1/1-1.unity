@@ -3620,17 +3620,6 @@ Transform:
   - {fileID: 1696919089}
   m_Father: {fileID: 513982644}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &308320221 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2654921395390218669, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
-  m_PrefabInstance: {fileID: 6286981809249909226}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd5618e7cb1af83898a88598416a7959, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &310979712
 GameObject:
   m_ObjectHideFlags: 0
@@ -11742,14 +11731,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 458613004}
     m_Modifications:
-    - target: {fileID: 230673769743900134, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 308320221}
-    - target: {fileID: 230673769743900134, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnRestartPressed
-      objectReference: {fileID: 0}
     - target: {fileID: 879635141589917253, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -11830,17 +11811,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1353530787206994918, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 308320221}
-    - target: {fileID: 1353530787206994918, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnQuitPressed
-      objectReference: {fileID: 0}
     - target: {fileID: 1717603137938135401, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
       propertyPath: m_Name
       value: HUD
+      objectReference: {fileID: 0}
+    - target: {fileID: 3436962343228954129, guid: 379126c51315c494dbfa161ca243cd50, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

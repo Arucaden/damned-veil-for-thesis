@@ -3,6 +3,13 @@ using UnityEngine;
 
 namespace ProjectLightsOut.Managers
 {
+    [System.Serializable]
+    public struct TutorialPageData
+    {
+        public Sprite Image;
+        [TextArea(3, 8)] public string Text;
+    }
+
     [CreateAssetMenu(fileName = "Level Data", menuName = "ProjectLightsOut/Level Data")]
     public class LevelDataSO : ScriptableObject
     {
@@ -12,6 +19,7 @@ namespace ProjectLightsOut.Managers
         public float AceTime = 60f;
         public List<string> NextLevelScenes;
         public bool IsBossLevel;
-        public List<Sprite> TutorialPages;
+        public List<TutorialPageData> TutorialPages;
+        public string DisplayName;
     }
 }

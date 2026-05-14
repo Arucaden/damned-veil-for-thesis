@@ -156,9 +156,9 @@ namespace ProjectLightsOut.Managers
 
     public class OnShowTutorial : GameEvent
     {
-        public List<Sprite> Pages;
+        public List<TutorialPageData> Pages;
 
-        public OnShowTutorial(List<Sprite> pages)
+        public OnShowTutorial(List<TutorialPageData> pages)
         {
             Pages = pages;
         }

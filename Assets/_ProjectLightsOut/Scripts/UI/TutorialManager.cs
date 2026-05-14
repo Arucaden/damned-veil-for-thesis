@@ -11,11 +11,13 @@ namespace ProjectLightsOut.UI
     {
         [SerializeField] private GameObject tutorialPanel;
         [SerializeField] private Image tutorialImage;
+        [SerializeField] private TextMeshProUGUI pageText;
         [SerializeField] private TextMeshProUGUI pageCounterText;
         [SerializeField] private Button nextButton;
         [SerializeField] private Button prevButton;
+        [SerializeField] private Button closeButton;
 
-        private List<Sprite> pages;
+        private List<TutorialPageData> pages;
         private int currentPageIndex;
 
         private void OnEnable()
@@ -23,6 +25,7 @@ namespace ProjectLightsOut.UI
             EventManager.AddListener<OnShowTutorial>(OnShowTutorial);
             nextButton.onClick.AddListener(NextPage);
             prevButton.onClick.AddListener(PreviousPage);
+            closeButton.onClick.AddListener(CloseTutorial);
         }
 
         private void OnDisable()
@@ -30,6 +33,7 @@ namespace ProjectLightsOut.UI
             EventManager.RemoveListener<OnShowTutorial>(OnShowTutorial);
             nextButton.onClick.RemoveListener(NextPage);
             prevButton.onClick.RemoveListener(PreviousPage);
+            closeButton.onClick.RemoveListener(CloseTutorial);
         }
 
         private void Start()
@@ -52,10 +56,6 @@ namespace ProjectLightsOut.UI
                 currentPageIndex++;
                 UpdateUI();
             }
-            else
-            {
-                CloseTutorial();
-            }
         }
 
         private void PreviousPage()
@@ -71,17 +71,38 @@ namespace ProjectLightsOut.UI
         {
             if (pages == null || pages.Count == 0) return;
 
-            tutorialImage.sprite = pages[currentPageIndex];
-            
+            TutorialPageData current = pages[currentPageIndex];
+
+            tutorialImage.sprite = current.Image;
+            tutorialImage.gameObject.SetActive(current.Image != null);
+
+            if (pageText != null)
+            {
+                pageText.text = current.Text;
+            }
+
             if (pageCounterText != null)
             {
-                pageCounterText.text = $"Page {currentPageIndex + 1} of {pages.Count}";
+                pageCounterText.text = $"{currentPageIndex + 1}";
             }
 
             prevButton.gameObject.SetActive(currentPageIndex > 0);
         }
 
-        private void CloseTutorial()
+        /// <summary>
+        /// Hides the tutorial panel without resuming the game.
+        /// Called when the player reaches the last page and presses Next.
+        /// </summary>
+        private void HideTutorial()
+        {
+            tutorialPanel.SetActive(false);
+        }
+
+        /// <summary>
+        /// Hides the tutorial panel AND resumes the game.
+        /// Should only be called by the close/exit button.
+        /// </summary>
+        public void CloseTutorial()
         {
             tutorialPanel.SetActive(false);
             EventManager.Broadcast(new OnChangeGameState(GameState.Playing));

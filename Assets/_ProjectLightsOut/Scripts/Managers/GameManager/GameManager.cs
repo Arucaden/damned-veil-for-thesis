@@ -69,6 +69,7 @@ namespace ProjectLightsOut.Managers
             switch (evt.GameState)
             {
                 case GameState.Playing:
+                    Time.timeScale = 1f;
                     EventManager.Broadcast(new OnResetScore());
                     EventManager.Broadcast(new OnPlayBGM("Gameplay"));
                     Cursor.visible = false;

@@ -119,6 +119,11 @@ namespace ProjectLightsOut.Managers
 
         private void OnCompleteCountingScore(OnCompleteCountingScore evt)
         {
+            if (LightsOut.Managers.LoginManager.Instance != null)
+            {
+                LightsOut.Managers.LoginManager.Instance.TrackLevelComplete(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + " Complete");
+            }
+
             string nextLevel = LevelManager.LevelData.NextLevelScenes[Random.Range(0, LevelManager.LevelData.NextLevelScenes.Count)];
             AppStateManager.Instance.GoToNextLevel(nextLevel);
         }

@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace DamnedVeil.ProceduralLogic
 {
-    /// <summary>
-    /// In-game PCG debug panel. Toggle visibility with the assigned key (default: Tab).
-    /// Attach to any GameObject in the scene and assign the ProceduralEnemySpawner reference.
-    /// </summary>
     public class PCGDebugPanel : MonoBehaviour
     {
         [SerializeField] private ProceduralEnemySpawner spawner;

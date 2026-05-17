@@ -63,7 +63,6 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
             Vector2 playerPosition = playerTransform.position;
             int attempts = 0;
 
-            var totalWatch = SDebug.Stopwatch.StartNew();
             double accSpTime = 0;
             double accCspTime = 0;
 
@@ -107,11 +106,10 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                         DrawPath(path);
                     }
 
-                    totalWatch.Stop();
                     lastAttemptCount = attempts;
-                    generationTimeMs = totalWatch.Elapsed.TotalMilliseconds;
                     spTimeMs = accSpTime;
                     cspTimeMs = accCspTime;
+                    generationTimeMs = accSpTime + accCspTime;
 
                     if (logDebugInfo)
                         UnityEngine.Debug.Log($"[ProceduralEnemySpawner] Success after {attempts} attempts! Spawned {enemyPositions.Count} enemies. Total: {generationTimeMs:F2}ms SP: {spTimeMs:F2}ms CSP: {cspTimeMs:F2}ms");
@@ -121,11 +119,10 @@ namespace DamnedVeil.ProceduralLogic.Orchestrator
                 }
             }
 
-            totalWatch.Stop();
             lastAttemptCount = attempts;
-            generationTimeMs = totalWatch.Elapsed.TotalMilliseconds;
             spTimeMs = accSpTime;
             cspTimeMs = accCspTime;
+            generationTimeMs = accSpTime + accCspTime;
 
             UnityEngine.Debug.LogWarning($"[ProceduralEnemySpawner] Failed to generate valid level after {maxAttempts} attempts!");
             return false;
